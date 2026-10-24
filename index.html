@@ -76,6 +76,8 @@
     </div>
 </header>
 <div class="info">
+    <p>姓名：孟可欣</p>
+    <p>学号：25108012010</p>
     <p>项目：3ds Max建模作业</p>
     <p>模型：cabinet.glb（柜子）、sofa.glb（沙发）</p>
     <p>当前视图：<span id="viewText">透视视图</span></p>
@@ -85,11 +87,11 @@
 <div id="container">
     <div id="tip">加载中...</div>
 </div>
-<footer>档案V1.4｜同时查看柜子、沙发；透视/正交切换；布线检查</footer>
+<footer>档案V1.6｜同时查看柜子、沙发；透视/正交切换；布线检查</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 const container = document.getElementById("container");
@@ -127,7 +129,6 @@ scene.add(new THREE.GridHelper(800,40,0xbbbb,0xdddd));
 let cabinetModel = null;
 let sofaModel = null;
 let wireOn=false;
-let loadCount = 0;
 const loader = new THREE.GLTFLoader();
 
 loader.load("./cabinet.glb",
@@ -138,8 +139,7 @@ loader.load("./cabinet.glb",
             if(o.isMesh) o.material.side = THREE.DoubleSide;
         })
         scene.add(cabinetModel);
-        loadCount++;
-        tipDom.innerText = `已加载：柜子 | 共2个`;
+        tipDom.innerText = `已加载：柜子`;
     },
     undefined,
     err=>{
@@ -156,7 +156,6 @@ loader.load("./sofa.glb",
             if(o.isMesh) o.material.side = THREE.DoubleSide;
         })
         scene.add(sofaModel);
-        loadCount++;
         tipDom.innerText = `✅ 全部加载完成！柜子+沙发`;
     },
     undefined,
