@@ -87,7 +87,7 @@
 <div id="container">
     <div id="tip">加载中...</div>
 </div>
-<footer>档案V1.6｜同时查看柜子、沙发；透视/正交切换；布线检查</footer>
+<footer>档案V1.7｜同时查看柜子、沙发；透视/正交切换；布线检查</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -99,16 +99,17 @@ const tipDom = document.getElementById("tip");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xe8e8e8);
 
-const perspectiveCam = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1,2500);
-perspectiveCam.position.set(400,220,420);
+// 相机拉近，更容易看到模型
+const perspectiveCam = new THREE.PerspectiveCamera(60, container.clientWidth/container.clientHeight, 0.1,2000);
+perspectiveCam.position.set(220,160,260);
 
-const frustumSize = 800;
+const frustumSize = 500;
 const orthoCam = new THREE.OrthographicCamera(
     -frustumSize/2, frustumSize/2,
     frustumSize/2, -frustumSize/2,
-    0.1,2500
+    0.1,2000
 );
-orthoCam.position.set(400,220,420);
+orthoCam.position.set(220,160,260);
 
 let currentCam = perspectiveCam;
 let isOrtho = false;
@@ -120,11 +121,11 @@ container.appendChild(renderer.domElement);
 
 const controls = new THREE.OrbitControls(currentCam, renderer.domElement);
 controls.enableDamping = true;
-controls.target.set(0,80,0);
+controls.target.set(0,30,0);
 
-scene.add(new THREE.DirectionalLight(0xffffff,0.85).position.set(300,400,250));
-scene.add(new THREE.AmbientLight(0xffffff,0.5));
-scene.add(new THREE.GridHelper(800,40,0xbbbb,0xdddd));
+scene.add(new THREE.DirectionalLight(0xffffff,1.0).position.set(200,300,200));
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+scene.add(new THREE.GridHelper(500,20,0xbbbb,0xdddd));
 
 let cabinetModel = null;
 let sofaModel = null;
@@ -134,9 +135,11 @@ const loader = new THREE.GLTFLoader();
 loader.load("./cabinet.glb",
     gltf=>{
         cabinetModel = gltf.scene;
-        cabinetModel.position.x = -180;
+        cabinetModel.position.set(-100,0,0);
         cabinetModel.traverse(o=>{
-            if(o.isMesh) o.material.side = THREE.DoubleSide;
+            if(o.isMesh) {
+                o.material.side = THREE.DoubleSide;
+            }
         })
         scene.add(cabinetModel);
         tipDom.innerText = `已加载：柜子`;
@@ -151,9 +154,11 @@ loader.load("./cabinet.glb",
 loader.load("./sofa.glb",
     gltf=>{
         sofaModel = gltf.scene;
-        sofaModel.position.x = 180;
+        sofaModel.position.set(100,0,0);
         sofaModel.traverse(o=>{
-            if(o.isMesh) o.material.side = THREE.DoubleSide;
+            if(o.isMesh) {
+                o.material.side = THREE.DoubleSide;
+            }
         })
         scene.add(sofaModel);
         tipDom.innerText = `✅ 全部加载完成！柜子+沙发`;
