@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>柜子模型｜作业档案</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f2f2f2; font-family: "Microsoft YaHei", SimHei, sans-serif; }
+
+        header {
+            background: #2c3e50;
+            color: #fff;
+            padding:14px 24px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        h1 { font-size:20px; font-weight:normal; }
+        .btn-group{
+            display:flex;
+            gap:10px;
+        }
+        button{
+            background:#34495e;
+            color:#fff;
+            border:none;
+            padding:8px 14px;
+            font-size:14px;
+            cursor:pointer;
+            border-radius:4px;
+        }
+        button.active{
+            background:#e67e22;
+        }
+        .info{
+            padding:10px 24px;
+            background:#fff;
+            border-bottom:1px solid #ddd;
+            font-size:14px;
+            color:#444;
+            display:flex;
+            gap:20px;
+            flex-wrap:wrap;
+        }
+        #container{
+            width:100%;
+            height:70vh;
+            background:#e9e9e9;
+        }
+        footer{
+            padding:10px 24px;
+            font-size:13px;
+            color:#666;
+            background:#fff;
+            border-top:1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>柜子模型｜作业档案</h1>
+    <div class="btn-group">
+        <button id="toggleProj">切换正交视图</button>
+        <button id="toggleWire">显示布线</button>
+    </div>
+</header>
+<div class="info">
+    <p>项目：3ds Max柜子建模作业</p>
+    <p>模型：cabinet.glb</p>
+    <p>当前视图：<span id="viewText">透视视图</span></p>
+    <p>模式：<span id="modeText">彩色实体</span></p>
+    <p>操作：左键旋转｜滚轮缩放｜右键平移</p>
+</div>
+<div id="container"></div>
+<footer>档案V1.2｜彩色实景 / 布线检查 / 透视‑正交可切换</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+const container = document.getElementById("container");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xe8e8e8);
+
+// 透视相机（默认启用）
+const perspectiveCam = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1,2000);
+perspectiveCam.position.set(280,180,320);
+
+// 正交相机
+const frustumSize = 600;
+const orthoCam = new THREE.OrthographicCamera(
+    -frustumSize/2, frustumSize/2,
+    frustumSize/2, -frustumSize/2,
+    0.1,2000
+);
+orthoCam.position.set(280,180,320);
+
+let currentCam = perspectiveCam;
+let isOrtho = false;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(currentCam, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0,60,0);
+
+//灯光
+scene.add(new THREE.DirectionalLight(0xffffff,0.85).position.set(200,300,180));
+scene.add(new THREE.AmbientLight(0xffffff,0.5));
+scene.add(new THREE.GridHelper(600,30,0xbbbb,0xdddd));
+
+let model=null;
+let wireOn=false;
+
+//加载模型
+new THREE.GLTFLoader().load("./cabinet.glb",
+    gltf=>{
+        model = gltf.scene;
+        scene.add(model);
+    },
+    undefined,
+    err=>{
+        container.innerHTML="<p style='padding:24px;color:#c0392b;'>未找到 cabinet.glb，请把glb和index.html放同一文件夹</p>";
+    }
+);
+
+//布线切换
+function setWireframe(enable){
+    if(!model) return;
+    model.traverse(obj=>{
+        if(obj.isMesh){
+            const mats = Array.isArray(obj.material)?obj.material:[obj.material];
+            mats.forEach(m=>m.wireframe=enable);
+        }
+    });
+}
+document.getElementById("toggleWire").onclick=()=>{
+    wireOn=!wireOn;
+    setWireframe(wireOn);
+    const btn = document.getElementById("toggleWire");
+    if(wireOn){
+        btn.textContent="隐藏布线";
+        btn.classList.add("active");
+        document.getElementById("modeText").textContent="线框布线";
+    }else{
+        btn.textContent="显示布线";
+        btn.classList.remove("active");
+        document.getElementById("modeText").textContent="彩色实体";
+    }
+};
+
+//透视/正交切换
+document.getElementById("toggleProj").onclick=()=>{
+    isOrtho=!isOrtho;
+    //复制相机位置旋转
+    const copyPos = currentCam.position.clone();
+    const copyRot = currentCam.rotation.clone();
+    if(isOrtho){
+        currentCam = orthoCam;
+        document.getElementById("toggleProj").textContent="切换透视视图";
+        document.getElementById("viewText").textContent="正交视图";
+    }else{
+        currentCam = perspectiveCam;
+        document.getElementById("toggleProj").textContent="切换正交视图";
+        document.getElementById("viewText").textContent="透视视图";
+    }
+    currentCam.position.copy(copyPos);
+    currentCam.rotation.copy(copyRot);
+    controls.object = currentCam;
+    controls.update();
+    onWindowResize();
+};
+
+function onWindowResize(){
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if(!isOrtho){
+        perspectiveCam.aspect = w/h;
+        perspectiveCam.updateProjectionMatrix();
+    }else{
+        const aspect = w/h;
+        orthoCam.left = -frustumSize*aspect/2;
+        orthoCam.right = frustumSize*aspect/2;
+        orthoCam.top = frustumSize/2;
+        orthoCam.bottom = -frustumSize/2;
+        orthoCam.updateProjectionMatrix();
+    }
+    renderer.setSize(w,h);
+}
+window.addEventListener("resize", onWindowResize);
+
+function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, currentCam);
+}
+animate();
+</script>
+</body>
+</html>
