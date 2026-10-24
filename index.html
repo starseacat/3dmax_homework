@@ -13,7 +13,7 @@
             flex-wrap: wrap; gap: 10px;
         }
         h1 { font-size: 20px; font-weight: normal; }
-        .btn-group { display: flex; gap: 10px; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
         button {
             background: #34495e; color: #fff; border: none;
             padding: 8px 14px; font-size: 14px; border-radius: 4px; cursor: pointer;
@@ -26,7 +26,7 @@
         #view-container { width: 100%; height: 72vh; background: #e9e9e9; position: relative; }
         #loading-tip {
             position: absolute; top: 12px; left: 12px;
-            background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 4px;
+            background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 4px; z-index: 10;
         }
         footer {
             padding: 10px 24px; background: #fff;
@@ -40,6 +40,7 @@
     <div class="btn-group">
         <button id="btn-proj">切换正交视图</button>
         <button id="btn-wire">显示布线</button>
+        <button id="btn-transparent">透明显示</button>
     </div>
 </header>
 <div class="info-bar">
@@ -49,12 +50,12 @@
     <span>模型：cabinet.glb（柜子）、sofa.glb（沙发）</span>
     <span>当前视图：<span id="text-view">透视视图</span></span>
     <span>模式：<span id="text-mode">彩色实体</span></span>
-    <span>操作：左键旋转｜滚轮缩放｜右键平移</span>
+    <span>操作：左键旋转｜中键平移｜滚轮缩放</span>
 </div>
 <div id="view-container">
     <div id="loading-tip">加载中...</div>
 </div>
-<footer>档案V1.9｜自动缩放模型；透视/正交切换；布线检查</footer>
+<footer>档案V2.0｜3dmax式操作；透视/正交切换；布线/透明检查</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -84,42 +85,52 @@ renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 container.appendChild(renderer.domElement);
 
+// 3dmax式操作：左键旋转，中键平移
 const controls = new THREE.OrbitControls(activeCamera, renderer.domElement);
 controls.enableDamping = true;
 controls.target.set(0, 80, 0);
+controls.mouseButtons = {
+    LEFT: THREE.MOUSE.ROTATE,
+    MIDDLE: THREE.MOUSE.PAN,
+    RIGHT: THREE.MOUSE.PAN
+};
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+// 加强灯光：半球光+方向光+补光
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.9);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
 dirLight.position.set(300, 400, 250);
 scene.add(dirLight);
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+const fillLight = new THREE.DirectionalLight(0xfff5e0, 0.8);
+fillLight.position.set(-200, 100, 200);
+scene.add(fillLight);
+
 scene.add(new THREE.GridHelper(400, 20, 0xbbbbbb, 0xdddddd));
 
 let cabinet = null;
 let sofa = null;
 let wireframeOn = false;
+let transparentOn = false;
 const gltfLoader = new THREE.GLTFLoader();
 
-// 自动缩放+居中+放到地面上
 function fitModel(model, offsetX) {
-    // 计算模型包围盒
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-    // 缩放到最大边约160单位
     const maxDim = Math.max(size.x, size.y, size.z) || 1;
     const scale = 160 / maxDim;
     model.scale.setScalar(scale);
-    // 重新计算包围盒
     const box2 = new THREE.Box3().setFromObject(model);
     const center2 = box2.getCenter(new THREE.Vector3());
-    // 居中并放到地面
     model.position.x += offsetX - center2.x;
     model.position.z -= center2.z;
     model.position.y -= box2.min.y;
-    // 双面渲染
     model.traverse(function(obj) {
         if (obj.isMesh) {
             obj.material.side = THREE.DoubleSide;
+            obj.material.transparent = false;
+            obj.material.opacity = 1.0;
         }
     });
 }
@@ -150,13 +161,19 @@ gltfLoader.load("./sofa.glb",
     }
 );
 
-function setWire(enable) {
+function applyDisplayMode() {
     function traverseObj(obj) {
         if (!obj) return;
         obj.traverse(child => {
             if (child.isMesh) {
                 const mats = Array.isArray(child.material) ? child.material : [child.material];
-                mats.forEach(m => { m.wireframe = enable; m.side = THREE.DoubleSide; });
+                mats.forEach(m => {
+                    m.wireframe = wireframeOn;
+                    m.side = THREE.DoubleSide;
+                    m.transparent = transparentOn;
+                    m.opacity = transparentOn ? 0.45 : 1.0;
+                    m.needsUpdate = true;
+                });
             }
         });
     }
@@ -166,14 +183,20 @@ function setWire(enable) {
 
 document.getElementById("btn-wire").onclick = function() {
     wireframeOn = !wireframeOn;
-    setWire(wireframeOn);
-    if (wireframeOn) {
-        this.textContent = "隐藏布线"; this.classList.add("active");
-        document.getElementById("text-mode").innerText = "线框布线";
-    } else {
-        this.textContent = "显示布线"; this.classList.remove("active");
-        document.getElementById("text-mode").innerText = "彩色实体";
-    }
+    if (wireframeOn) transparentOn = false;
+    applyDisplayMode();
+    this.classList.toggle("active", wireframeOn);
+    this.textContent = wireframeOn ? "隐藏布线" : "显示布线";
+    document.getElementById("text-mode").innerText = wireframeOn ? "线框布线" : (transparentOn ? "半透明" : "彩色实体");
+};
+
+document.getElementById("btn-transparent").onclick = function() {
+    transparentOn = !transparentOn;
+    if (transparentOn) wireframeOn = false;
+    applyDisplayMode();
+    this.classList.toggle("active", transparentOn);
+    this.textContent = transparentOn ? "不透明" : "透明显示";
+    document.getElementById("text-mode").innerText = transparentOn ? "半透明" : (wireframeOn ? "线框布线" : "彩色实体");
 };
 
 document.getElementById("btn-proj").onclick = function() {
