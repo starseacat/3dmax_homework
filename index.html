@@ -489,6 +489,29 @@ function renderHome(){
     </div>`;
 }
 
+/* ---------- 自动加载约定路径的图片 ---------- */
+function loadImg(src){
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+}
+
+async function autoLoad(){
+  const boxes = document.querySelectorAll('.shots[data-auto]');
+  for (const box of boxes){
+    const base = box.dataset.auto;
+    for (let i = 1; i <= 6; i++){
+      const src = base + (i === 1 ? '.jpg' : '-' + i + '.jpg');
+      const im = await loadImg(src);
+      if (!im) break;          // 第一张都没有就跳过
+      box.appendChild(im);
+    }
+  }
+}
+
 function renderWork(w){
   document.title = w.title + '建模记录 · ' + SITE.name;
 
@@ -496,9 +519,10 @@ function renderWork(w){
     <h2 class="section-head"><span class="dot">${i + 1}</span>${esc(s.title)}</h2>
     <p class="body-text">${esc(s.text)}</p>
     ${s.tip ? `<div class="tip"><span>💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
-    ${shots(s.images)}`).join('');
+    ${shots(s.images)}
+    <div class="shots" data-auto="assets/img/${esc(w.id)}/${i + 1}"></div>`).join('');
 
-  const logs = (w.logs || []).map(l => `
+  const logs = (w.logs || []).map((l, i) => `
     <div class="log-item">
       <div class="log-head">
         <span class="log-title">${esc(l.title)}</span>
@@ -506,6 +530,7 @@ function renderWork(w){
       </div>
       <p class="body-text">${esc(l.text)}</p>
       ${shots(l.images)}
+      <div class="shots" data-auto="assets/img/${esc(w.id)}/log${i + 1}"></div>
     </div>`).join('');
 
   app.innerHTML = `
@@ -522,7 +547,10 @@ function renderWork(w){
       </article>
       <footer class="footer">${esc(SITE.footer)}</footer>
     </div>`;
+
+  autoLoad();
 }
+
 
 function render(){
   const id = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
