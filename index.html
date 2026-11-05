@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>孟可欣 · 三维建模作业</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3/dist/model-viewer.min.js"></script>
 <style>
 *{box-sizing:border-box}
 
@@ -34,10 +34,7 @@ a{color:inherit;text-decoration:none}
   box-shadow:0 0 46px 10px rgba(160,200,255,.38), inset -10px -8px 16px rgba(90,130,190,.35);
   opacity:.92;
 }
-.moon::before,.moon::after{
-  content:"";position:absolute;border-radius:50%;
-  background:rgba(120,152,196,.35);
-}
+.moon::before,.moon::after{content:"";position:absolute;border-radius:50%;background:rgba(120,152,196,.35)}
 .moon::before{width:14px;height:14px;top:16px;left:20px}
 .moon::after{width:9px;height:9px;top:44px;left:48px}
 
@@ -49,8 +46,7 @@ a{color:inherit;text-decoration:none}
 }
 .planet::after{
   content:"";position:absolute;left:-36px;top:36px;width:190px;height:52px;
-  border:2px solid rgba(160,200,255,.42);border-radius:50%;
-  transform:rotate(-22deg);
+  border:2px solid rgba(160,200,255,.42);border-radius:50%;transform:rotate(-22deg);
 }
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 
@@ -58,7 +54,6 @@ a{color:inherit;text-decoration:none}
 
 /* ============ 首页 ============ */
 .home{max-width:820px;margin:0 auto;padding:76px 24px 0;text-align:center}
-
 .home-title{
   display:inline-block;margin:0;padding-bottom:14px;
   font-size:29px;font-weight:600;letter-spacing:.04em;color:#dce9ff;
@@ -150,6 +145,36 @@ a{color:inherit;text-decoration:none}
   100%{transform:translateX(380%)}
 }
 
+/* ============ 留言模块 ============ */
+.msg-box{
+  max-width:640px;margin:44px auto 0;padding:24px 26px;text-align:left;
+  background:linear-gradient(180deg,rgba(24,48,98,.7),rgba(11,25,56,.85));
+  border:1px solid rgba(125,170,255,.18);
+  border-radius:20px;
+}
+.msg-box h2{margin:0 0 6px;font-size:16px;font-weight:600;color:#dce9ff}
+.msg-tip{margin:0 0 14px;font-size:12.5px;color:#96afd6}
+.mail-btn{
+  display:block;padding:12px;text-align:center;
+  font-size:14px;font-weight:600;color:#04122c;
+  background:linear-gradient(135deg,#5b9bff,#9ad0ff);
+  border-radius:10px;
+}
+/* 以后接 Formspree 用得到 */
+.msg-form input,.msg-form textarea{
+  width:100%;padding:10px 12px;margin-bottom:10px;font-size:14px;color:#e8f0ff;
+  font-family:inherit;resize:vertical;
+  background:rgba(8,20,44,.85);
+  border:1px solid rgba(125,170,255,.25);border-radius:10px;outline:none;
+}
+.msg-form input:focus,.msg-form textarea:focus{border-color:rgba(140,190,255,.6)}
+.msg-form button{
+  width:100%;padding:11px;font-size:14px;font-weight:600;color:#04122c;cursor:pointer;
+  background:linear-gradient(135deg,#5b9bff,#9ad0ff);
+  border:none;border-radius:10px;
+}
+.msg-state{margin:8px 0 0;font-size:12.5px;color:#a8c6d6}
+
 /* ============ 详情页 ============ */
 .work{max-width:1000px;margin:0 auto;padding:40px 24px 0}
 
@@ -186,6 +211,23 @@ a{color:inherit;text-decoration:none}
 }
 .overview strong{color:#a9cbff}
 
+/* 3D 预览 */
+.viewer{
+  position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
+  border:1px solid rgba(125,170,255,.18);
+  background:radial-gradient(circle at 50% 40%, rgba(40,80,160,.35), rgba(8,20,44,.7));
+}
+.viewer model-viewer{width:100%;height:460px;background:transparent}
+.mv-bar{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap}
+.mv-bar button{
+  padding:6px 13px;font-size:12.5px;color:#cfe0ff;cursor:pointer;
+  background:rgba(10,24,52,.78);
+  border:1px solid rgba(125,170,255,.3);
+  border-radius:999px;
+}
+.mv-bar button:hover{background:rgba(60,110,200,.55)}
+.mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
+
 .section-head{
   display:flex;align-items:center;gap:10px;
   margin:36px 0 14px;
@@ -210,7 +252,10 @@ a{color:inherit;text-decoration:none}
 .tip p{margin:0;line-height:1.85}
 .tip strong{color:#9ad0ff}
 
-.shots{margin-top:18px;display:grid;gap:14px}
+.shots{
+  margin-top:18px;display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+}
 .shots img{
   width:100%;display:block;cursor:zoom-in;
   border:1px solid rgba(140,180,255,.22);
@@ -255,7 +300,7 @@ a{color:inherit;text-decoration:none}
 #zoom.open{display:flex}
 #zoom img{max-width:100%;max-height:92vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 
-/* ============ 手机端 ============ */
+/* ============ 手机端（放最后，才能覆盖上面） ============ */
 @media (max-width:640px){
   .home{padding-top:48px}
   .home-title{font-size:21px}
@@ -271,46 +316,8 @@ a{color:inherit;text-decoration:none}
   .moon{width:54px;height:54px;top:5vh;right:8vw}
   .update-card{padding:18px 20px 16px}
   .update-dots{display:none}
+  .viewer model-viewer{height:320px}
 }
-  /* 3D 预览 */
-.viewer{
-  position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
-  border:1px solid rgba(125,170,255,.18);
-  background:radial-gradient(circle at 50% 40%, rgba(40,80,160,.35), rgba(8,20,44,.7));
-}
-.viewer model-viewer{width:100%;height:460px;background:transparent}
-.mv-bar{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap}
-.mv-bar button{
-  padding:6px 13px;font-size:12.5px;color:#cfe0ff;cursor:pointer;
-  background:rgba(10,24,52,.78);
-  border:1px solid rgba(125,170,255,.3);
-  border-radius:999px;
-}
-.mv-bar button:hover{background:rgba(60,110,200,.55)}
-.mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
-
-/* 留言 */
-.msg-box{
-  max-width:640px;margin:44px auto 0;padding:24px 26px;text-align:left;
-  background:linear-gradient(180deg,rgba(24,48,98,.7),rgba(11,25,56,.85));
-  border:1px solid rgba(125,170,255,.18);border-radius:20px;
-}
-.msg-box h2{margin:0 0 6px;font-size:16px;font-weight:600;color:#dce9ff}
-.msg-tip{margin:0 0 14px;font-size:12.5px;color:#96afd6}
-.msg-form input,.msg-form textarea{
-  width:100%;padding:10px 12px;margin-bottom:10px;font-size:14px;color:#e8f0ff;
-  font-family:inherit;resize:vertical;
-  background:rgba(8,20,44,.85);
-  border:1px solid rgba(125,170,255,.25);border-radius:10px;outline:none;
-}
-.msg-form input:focus,.msg-form textarea:focus{border-color:rgba(140,190,255,.6)}
-.msg-form button{
-  width:100%;padding:11px;font-size:14px;font-weight:600;color:#04122c;cursor:pointer;
-  background:linear-gradient(135deg,#5b9bff,#9ad0ff);
-  border:none;border-radius:10px;
-}
-.msg-state{margin:8px 0 0;font-size:12.5px;color:#a8c6d6}
-
 </style>
 </head>
 <body>
@@ -330,13 +337,14 @@ const SITE = {
   name: "孟可欣",
   studentId: "25108012010",
   className: "25级数字媒体技术1班",
+  email: "mengmo07@163.com",
   footer: "© 2025 孟可欣 · 25级数字媒体技术1班"
 };
 
 /* ================= 2. 作业内容 =================
-   images 里填图片路径，例如 ["assets/img/sofa-01.jpg"]
-   图片放到仓库的 assets/img/ 文件夹
-=============================================== */
+   图片自动读 assets/img/{id}/1.jpg、2.jpg ……
+   3D 模型填 model 字段，例如 "assets/model/cartoon-house.glb"
+================================================ */
 const WORKS = [
   {
     id: "computer-set",
@@ -383,24 +391,25 @@ const WORKS = [
     id: "cartoon-house",
     icon: "🏠",
     title: "卡通小房子",
-    model: "assets/model/cartoon-hose.glb"
+    model: "assets/model/cartoon-house.glb",
     desc: "可编辑多边形 · 挤出屋顶 · 圆角细节",
     overview: "先搭建白模确定房子的比例和屋顶坡度，用长方体搭出墙体，屋顶用挤出再用塌陷生成坡面，再补门窗、烟囱等细节，最后用低饱和卡通配色渲染。（图片加载需要时间，请等待）",
     steps: [
       {
         title: "上传原图",
-        text: " ",
+        text: "",
+        tip: "",
         images: []
       },
       {
         title: "墙体与屋顶",
         text: "墙体用正方体，顶面进行挤出，接着选中相对的两条边进行塌陷做出屋顶效果。",
-        tip: "遵循对称原则，每个box的平面位置都是（0，0）。",
+        tip: "遵循对称原则，每个 box 的平面位置都是（0，0）。",
         images: []
       },
       {
         title: "继续屋顶",
-        text: "ctrl+shift上述的两个面，再用壳修改器做出屋顶效果",
+        text: "ctrl+shift 上述的两个面，再用壳修改器做出屋顶效果",
         tip: "",
         images: []
       },
@@ -410,16 +419,18 @@ const WORKS = [
         tip: "",
         images: []
       },
-      {        
-       title: "屋顶圆角，丰富细节",        
-       text: "加了一些装饰",             
-       images: []      
-     },
-      {               
-      title: "渲染完成",               
-      text: "加了路灯，让环境光合理了一点，没有按照参考图上色（感觉有点丑）",                    
-      images: []           
-},
+      {
+        title: "屋顶圆角，丰富细节",
+        text: "加了一些装饰",
+        tip: "",
+        images: []
+      },
+      {
+        title: "渲染完成",
+        text: "加了路灯，让环境光合理了一点，没有按照参考图上色（感觉有点丑）",
+        tip: "",
+        images: []
+      }
     ],
     logs: []
   },
@@ -488,7 +499,7 @@ const WORKS = [
   }
 })();
 
-/* ================= 4. 渲染逻辑（不用改） ================= */
+/* ================= 4. 工具 ================= */
 const app  = document.getElementById('app');
 const zoom = document.getElementById('zoom');
 
@@ -501,8 +512,33 @@ function shots(v){
   return `<div class="shots">${a.map(src => `<img src="${esc(src)}" alt="" loading="lazy">`).join('')}</div>`;
 }
 
+/* 自动加载 assets/img/{id}/1.jpg、1-2.jpg …… */
+function loadImg(src){
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+}
+
+async function autoLoad(){
+  const boxes = document.querySelectorAll('.shots[data-auto]');
+  for (const box of boxes){
+    const base = box.dataset.auto;
+    for (let i = 1; i <= 6; i++){
+      const src = base + (i === 1 ? '.jpg' : '-' + i + '.jpg');
+      const im = await loadImg(src);
+      if (!im) break;
+      box.appendChild(im);
+    }
+  }
+}
+
+/* ================= 5. 首页 ================= */
 function renderHome(){
   document.title = SITE.name + ' · 三维建模作业';
+
   const cards = WORKS.map(w => `
     <a class="card" href="#/${esc(w.id)}">
       <div class="card-icon">${esc(w.icon)}</div>
@@ -534,59 +570,24 @@ function renderHome(){
           <div class="update-bar"><span></span></div>
         </div>
       </div>
-      
+
       <section class="msg-box">
-4          
-<h2>💬 留言与改善建议</h2>
-5          
-<p class="msg-tip">欢迎留下改进建议，我会据此继续修改。</p>
-6          
-<form class="msg-form" action="https://formspree.io/f/把这里换成你的ID" method="POST">
-7            
-<input type="text" name="称呼" placeholder="您的称呼（可选）">
-8            
-<textarea name="建议" rows="4" required placeholder="请写下您的建议…"></textarea>
-9            
-<button type="submit">提交建议</button>
-10            
-<p class="msg-state"></p>
-11          
-</form>
-12        
-</section>
+        <h2>💬 留言与改善建议</h2>
+        <p class="msg-tip">欢迎留下改进建议，我会据此继续修改。</p>
+        <a class="mail-btn" href="mailto:${esc(SITE.email)}?subject=${encodeURIComponent('三维建模作业建议')}">✉️ 直接发邮件给我</a>
+      </section>
+
       <footer class="footer">${esc(SITE.footer)}</footer>
     </div>`;
 }
 
-/* ---------- 自动加载约定路径的图片 ---------- */
-function loadImg(src){
-  return new Promise(res => {
-    const im = new Image();
-    im.onload = () => res(im);
-    im.onerror = () => res(null);
-    im.src = src;
-  });
-}
-
-async function autoLoad(){
-  const boxes = document.querySelectorAll('.shots[data-auto]');
-  for (const box of boxes){
-    const base = box.dataset.auto;
-    for (let i = 1; i <= 6; i++){
-      const src = base + (i === 1 ? '.jpg' : '-' + i + '.jpg');
-      const im = await loadImg(src);
-      if (!im) break;          // 第一张都没有就跳过
-      box.appendChild(im);
-    }
-  }
-}
-
+/* ================= 6. 详情页 ================= */
 function renderWork(w){
   document.title = w.title + '建模记录 · ' + SITE.name;
 
   const steps = (w.steps || []).map((s, i) => `
     <h2 class="section-head"><span class="dot">${i + 1}</span>${esc(s.title)}</h2>
-    <p class="body-text">${esc(s.text)}</p>
+    ${s.text ? `<p class="body-text">${esc(s.text)}</p>` : ''}
     ${s.tip ? `<div class="tip"><span>💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
     ${shots(s.images)}
     <div class="shots" data-auto="assets/img/${esc(w.id)}/${i + 1}"></div>`).join('');
@@ -597,7 +598,7 @@ function renderWork(w){
         <span class="log-title">${esc(l.title)}</span>
         ${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ''}
       </div>
-      <p class="body-text">${esc(l.text)}</p>
+      ${l.text ? `<p class="body-text">${esc(l.text)}</p>` : ''}
       ${shots(l.images)}
       <div class="shots" data-auto="assets/img/${esc(w.id)}/log${i + 1}"></div>
     </div>`).join('');
@@ -605,12 +606,14 @@ function renderWork(w){
   app.innerHTML = `
     <div class="work">
       <a class="back" href="#/">← 返回首页</a>
+
       <header class="work-head">
         <h1 class="work-title">${esc(w.icon)} ${esc(w.title)}建模记录</h1>
         <p class="work-sub">${esc(SITE.name)} · ${esc(SITE.studentId)} · 三维建模作业</p>
       </header>
+
       <article class="panel">
-                <div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>
+        <div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>
 
         ${w.model ? `
         <div class="viewer">
@@ -629,30 +632,35 @@ function renderWork(w){
         ${steps}
         ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
       </article>
+
       <footer class="footer">${esc(SITE.footer)}</footer>
     </div>`;
 
   autoLoad();
 }
 
-
+/* ================= 7. 路由 ================= */
 function render(){
   const id = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
   const w = WORKS.find(x => x.id === id);
   w ? renderWork(w) : renderHome();
   window.scrollTo(0, 0);
 }
-
 window.addEventListener('hashchange', render);
 
+/* ================= 8. 交互 ================= */
 document.addEventListener('click', e => {
   const img = e.target.closest('.shots img');
-  if (img){ zoom.firstElementChild.src = img.src; zoom.classList.add('open'); }
-  else if (e.target.closest('#zoom')) zoom.classList.remove('open');
-});
+  if (img){
+    zoom.firstElementChild.src = img.src;
+    zoom.classList.add('open');
+    return;
+  }
+  if (e.target.closest('#zoom')){
+    zoom.classList.remove('open');
+    return;
+  }
 
-  /* 3D 预览按钮 */
-document.addEventListener('click', e => {
   const b = e.target.closest('[data-mv]');
   if (!b) return;
   const mv = document.getElementById('mv');
@@ -679,23 +687,23 @@ document.addEventListener('click', e => {
   }
 });
 
-/* 留言表单 */
+/* 如果以后换成 Formspree 表单，这段会自动生效 */
 document.addEventListener('submit', async e => {
   const f = e.target.closest('.msg-form');
   if (!f) return;
   e.preventDefault();
   const st = f.querySelector('.msg-state');
-  st.textContent = '提交中…';
+  if (st) st.textContent = '提交中…';
   try{
     const res = await fetch(f.action, {
       method: 'POST',
       body: new FormData(f),
       headers: { 'Accept': 'application/json' }
     });
-    if (res.ok){ f.reset(); st.textContent = '已提交，感谢您的建议！'; }
-    else st.textContent = '提交失败，请稍后再试';
+    if (res.ok){ f.reset(); if (st) st.textContent = '已提交，感谢您的建议！'; }
+    else if (st) st.textContent = '提交失败，请稍后再试';
   }catch (err){
-    st.textContent = '网络错误：' + err.message;
+    if (st) st.textContent = '网络错误：' + err.message;
   }
 });
 
