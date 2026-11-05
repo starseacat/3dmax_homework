@@ -1,247 +1,143 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>柜子&沙发｜作业档案</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f2f2f2; font-family: "Microsoft YaHei", sans-serif; }
-        header {
-            background: #2c3e50; color: #fff; padding: 14px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 10px;
-        }
-        h1 { font-size: 20px; font-weight: normal; }
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        button {
-            background: #34495e; color: #fff; border: none;
-            padding: 8px 14px; font-size: 14px; border-radius: 4px; cursor: pointer;
-        }
-        button.active { background: #e67e22; }
-        .info-bar {
-            padding: 10px 24px; background: #fff; border-bottom: 1px solid #ddd;
-            font-size: 14px; color: #444; display: flex; flex-wrap: wrap; gap: 18px;
-        }
-        #view-container { width: 100%; height: 72vh; background: #e9e9e9; position: relative; }
-        #loading-tip {
-            position: absolute; top: 12px; left: 12px;
-            background: rgba(255,255,255,0.85); padding: 6px 10px; border-radius: 4px; z-index: 10;
-        }
-        footer {
-            padding: 10px 24px; background: #fff;
-            border-top: 1px solid #ddd; font-size: 13px; color: #666;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三维建模作业</title>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<header>
-    <h1>柜子&沙发｜作业档案</h1>
-    <div class="btn-group">
-        <button id="btn-proj">切换正交视图</button>
-        <button id="btn-wire">显示布线</button>
-        <button id="btn-transparent">透明显示</button>
-    </div>
-</header>
-<div class="info-bar">
-    <span>姓名：孟可欣</span>
-    <span>学号：25108012010</span>
-    <span>项目：3ds Max建模作业</span>
-    <span>模型：cabinet.glb（柜子）、sofa.glb（沙发）</span>
-    <span>当前视图：<span id="text-view">透视视图</span></span>
-    <span>模式：<span id="text-mode">彩色实体</span></span>
-    <span>操作：左键旋转｜中键平移｜滚轮缩放</span>
-</div>
-<div id="view-container">
-    <div id="loading-tip">加载中...</div>
-</div>
-<footer>档案V2.0｜3dmax式操作；透视/正交切换；布线/透明检查</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<div id="app"><div class="loading">加载中…</div></div>
+<div id="lightbox"><img alt=""></div>
 
 <script>
-const container = document.getElementById("view-container");
-const tipDom = document.getElementById("loading-tip");
+const app      = document.getElementById('app');
+const lightbox = document.getElementById('lightbox');
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xe8e8e8);
+const site  = { name: '', studentId: '', className: '', footer: '' };
+let   works = [];
 
-const perspectiveCamera = new THREE.PerspectiveCamera(60, container.clientWidth/container.clientHeight, 0.1, 5000);
-perspectiveCamera.position.set(250, 180, 300);
+/* ---------- 小工具 ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"]/g,
+  c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
 
-const frustumSize = 400;
-const orthoCamera = new THREE.OrthographicCamera(
-    -frustumSize/2, frustumSize/2, frustumSize/2, -frustumSize/2, 0.1, 5000
-);
-orthoCamera.position.set(250, 180, 300);
+const imgList = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
 
-let activeCamera = perspectiveCamera;
-let useOrtho = false;
-
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-container.appendChild(renderer.domElement);
-
-// 3dmax式操作：左键旋转，中键平移
-const controls = new THREE.OrbitControls(activeCamera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 80, 0);
-controls.mouseButtons = {
-    LEFT: THREE.MOUSE.ROTATE,
-    MIDDLE: THREE.MOUSE.PAN,
-    RIGHT: THREE.MOUSE.PAN
-};
-
-// 加强灯光：半球光+方向光+补光
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.9);
-scene.add(hemiLight);
-
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-dirLight.position.set(300, 400, 250);
-scene.add(dirLight);
-
-const fillLight = new THREE.DirectionalLight(0xfff5e0, 0.8);
-fillLight.position.set(-200, 100, 200);
-scene.add(fillLight);
-
-scene.add(new THREE.GridHelper(400, 20, 0xbbbbbb, 0xdddddd));
-
-let cabinet = null;
-let sofa = null;
-let wireframeOn = false;
-let transparentOn = false;
-const gltfLoader = new THREE.GLTFLoader();
-
-function fitModel(model, offsetX) {
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z) || 1;
-    const scale = 160 / maxDim;
-    model.scale.setScalar(scale);
-    const box2 = new THREE.Box3().setFromObject(model);
-    const center2 = box2.getCenter(new THREE.Vector3());
-    model.position.x += offsetX - center2.x;
-    model.position.z -= center2.z;
-    model.position.y -= box2.min.y;
-    model.traverse(function(obj) {
-        if (obj.isMesh) {
-            obj.material.side = THREE.DoubleSide;
-            obj.material.transparent = false;
-            obj.material.opacity = 1.0;
-        }
-    });
+function shots(list){
+  const imgs = imgList(list);
+  if (!imgs.length) return '';
+  return `<div class="shots">${imgs.map(src =>
+    `<img src="${esc(src)}" alt="" loading="lazy">`).join('')}</div>`;
 }
 
-gltfLoader.load("./cabinet.glb",
-    function(gltf) {
-        cabinet = gltf.scene;
-        fitModel(cabinet, -110);
-        scene.add(cabinet);
-        tipDom.innerText = "已加载：柜子";
-    },
-    undefined,
-    function(err) {
-        tipDom.innerText = "❌ 柜子加载失败 cabinet.glb";
-    }
-);
+/* ---------- 首页 ---------- */
+function renderHome(){
+  document.title = `${site.name} · 三维建模作业`;
 
-gltfLoader.load("./sofa.glb",
-    function(gltf) {
-        sofa = gltf.scene;
-        fitModel(sofa, 110);
-        scene.add(sofa);
-        tipDom.innerText = "✅ 全部加载完成！柜子+沙发";
-    },
-    undefined,
-    function(err) {
-        tipDom.innerText = "❌ 沙发加载失败 sofa.glb";
-    }
-);
+  const cards = works.map(w => `
+    <a class="card" href="#/${esc(w.id)}">
+      <div class="card-icon">${esc(w.icon) || '📦'}</div>
+      <h2 class="card-title">${esc(w.title)}</h2>
+      <div class="card-line"></div>
+      <p class="card-desc">${esc(w.desc)}</p>
+    </a>`).join('');
 
-function applyDisplayMode() {
-    function traverseObj(obj) {
-        if (!obj) return;
-        obj.traverse(child => {
-            if (child.isMesh) {
-                const mats = Array.isArray(child.material) ? child.material : [child.material];
-                mats.forEach(m => {
-                    m.wireframe = wireframeOn;
-                    m.side = THREE.DoubleSide;
-                    m.transparent = transparentOn;
-                    m.opacity = transparentOn ? 0.45 : 1.0;
-                    m.needsUpdate = true;
-                });
-            }
-        });
-    }
-    traverseObj(cabinet);
-    traverseObj(sofa);
+  app.innerHTML = `
+  <div class="home">
+    <header class="home-head">
+      <h1 class="home-title">✦ 欢迎来到${esc(site.name)}的个人网站 ✦</h1>
+      <p class="home-meta">姓名：${esc(site.name)} · 学号：${esc(site.studentId)} · ${esc(site.className)}</p>
+    </header>
+
+    <div class="cards">${cards || '<p class="empty">还没有作业，去后台添加吧</p>'}</div>
+
+    <footer class="footer">${esc(site.footer)}</footer>
+  </div>`;
 }
 
-document.getElementById("btn-wire").onclick = function() {
-    wireframeOn = !wireframeOn;
-    if (wireframeOn) transparentOn = false;
-    applyDisplayMode();
-    this.classList.toggle("active", wireframeOn);
-    this.textContent = wireframeOn ? "隐藏布线" : "显示布线";
-    document.getElementById("text-mode").innerText = wireframeOn ? "线框布线" : (transparentOn ? "半透明" : "彩色实体");
-};
+/* ---------- 作业详情 ---------- */
+function renderWork(w){
+  document.title = `${w.title}建模记录 · ${site.name}`;
 
-document.getElementById("btn-transparent").onclick = function() {
-    transparentOn = !transparentOn;
-    if (transparentOn) wireframeOn = false;
-    applyDisplayMode();
-    this.classList.toggle("active", transparentOn);
-    this.textContent = transparentOn ? "不透明" : "透明显示";
-    document.getElementById("text-mode").innerText = transparentOn ? "半透明" : (wireframeOn ? "线框布线" : "彩色实体");
-};
+  const steps = (w.steps || []).map((s, i) => `
+    <h2 class="section-head"><span class="dot">${i + 1}</span>${esc(s.title)}</h2>
+    <p class="body-text">${esc(s.text)}</p>
+    ${s.tip ? `<div class="tip"><span class="tip-icon">💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
+    ${shots(s.images)}`).join('');
 
-document.getElementById("btn-proj").onclick = function() {
-    useOrtho = !useOrtho;
-    const oldPos = activeCamera.position.clone();
-    const oldRot = activeCamera.rotation.clone();
-    if (useOrtho) {
-        activeCamera = orthoCamera;
-        this.textContent = "切换透视视图";
-        document.getElementById("text-view").innerText = "正交视图";
-    } else {
-        activeCamera = perspectiveCamera;
-        this.textContent = "切换正交视图";
-        document.getElementById("text-view").innerText = "透视视图";
-    }
-    activeCamera.position.copy(oldPos);
-    activeCamera.rotation.copy(oldRot);
-    controls.object = activeCamera;
-    controls.update();
-    onResize();
-};
+  const logs = (w.logs || []).map(l => `
+    <div class="log-item">
+      <div class="log-head">
+        <span class="log-title">${esc(l.title)}</span>
+        ${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ''}
+      </div>
+      <p class="body-text">${esc(l.text)}</p>
+      ${shots(l.images)}
+    </div>`).join('');
 
-function onResize() {
-    const w = container.clientWidth, h = container.clientHeight;
-    if (!useOrtho) {
-        perspectiveCamera.aspect = w/h;
-        perspectiveCamera.updateProjectionMatrix();
-    } else {
-        const aspect = w/h;
-        orthoCamera.left = -frustumSize*aspect/2;
-        orthoCamera.right = frustumSize*aspect/2;
-        orthoCamera.top = frustumSize/2;
-        orthoCamera.bottom = -frustumSize/2;
-        orthoCamera.updateProjectionMatrix();
-    }
-    renderer.setSize(w, h);
+  app.innerHTML = `
+  <div class="work">
+    <a class="back" href="#/">← 返回首页</a>
+
+    <header class="work-head">
+      <h1 class="work-title">${esc(w.icon)} ${esc(w.title)}建模记录</h1>
+      <p class="work-sub">${esc(site.name)} · ${esc(site.studentId)} · 三维建模作业</p>
+    </header>
+
+    <article class="panel">
+      ${w.overview ? `<div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>` : ''}
+      ${steps}
+      ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
+    </article>
+
+    <footer class="footer">${esc(site.footer)}</footer>
+  </div>`;
 }
-window.addEventListener("resize", onResize);
 
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, activeCamera);
+/* ---------- 路由 ---------- */
+function render(){
+  const id = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+  const work = works.find(w => w.id === id);
+  work ? renderWork(work) : renderHome();
+  window.scrollTo(0, 0);
 }
-animate();
+
+window.addEventListener('hashchange', render);
+
+/* ---------- 点击图片放大 ---------- */
+document.addEventListener('click', e => {
+  const img = e.target.closest('.shots img');
+  if (img){
+    lightbox.firstElementChild.src = img.src;
+    lightbox.classList.add('open');
+  } else if (e.target.closest('#lightbox')){
+    lightbox.classList.remove('open');
+  }
+});
+
+/* ---------- 启动：读取 JSON ---------- */
+(async function boot(){
+  try{
+    const [s, w] = await Promise.all([
+      fetch('content/site.json',  { cache: 'no-cache' }).then(r => r.json()),
+      fetch('content/works.json', { cache: 'no-cache' }).then(r => r.json())
+    ]);
+    Object.assign(site, s);
+    works = Array.isArray(w) ? w : [];
+    render();
+  }catch (err){
+    app.innerHTML = `
+      <div class="error">
+        <h2>内容读取失败</h2>
+        <p>如果你是直接双击打开 index.html，浏览器会拦截本地 JSON 读取（CORS 限制），这是正常现象。</p>
+        <p>请用本地服务器预览：在项目文件夹里执行</p>
+        <pre>python -m http.server 8000</pre>
+        <p>然后打开 <code>http://localhost:8000</code></p>
+        <p class="err-detail">错误信息：${esc(err.message)}</p>
+      </div>`;
+  }
+})();
 </script>
 </body>
 </html>
