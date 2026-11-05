@@ -3,67 +3,499 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>三维建模作业</title>
-<link rel="stylesheet" href="assets/style.css">
+<title>孟可欣 · 三维建模作业</title>
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;min-height:100vh;color:#e8f0ff;line-height:1.8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1100px 760px at 12% -12%, #1b3c7a 0%, transparent 58%),
+    radial-gradient(900px 700px at 92% 4%, #143a72 0%, transparent 55%),
+    linear-gradient(180deg,#060f24 0%,#0a1a3d 45%,#07132c 100%);
+  background-attachment:fixed;
+}
+a{color:inherit;text-decoration:none}
+
+/* ============ 星空装饰 ============ */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#stars span{
+  position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle 3.6s ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+
+.moon{
+  position:absolute;top:8vh;right:9vw;width:76px;height:76px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #f2f8ff, #c3d8f7 58%, #8fb3e0 100%);
+  box-shadow:0 0 46px 10px rgba(160,200,255,.38), inset -10px -8px 16px rgba(90,130,190,.35);
+  opacity:.92;
+}
+.moon::before,.moon::after{
+  content:"";position:absolute;border-radius:50%;
+  background:rgba(120,152,196,.35);
+}
+.moon::before{width:14px;height:14px;top:16px;left:20px}
+.moon::after{width:9px;height:9px;top:44px;left:48px}
+
+.planet{
+  position:absolute;left:5vw;bottom:8vh;width:118px;height:118px;border-radius:50%;
+  background:radial-gradient(circle at 30% 26%, #8dbaff, #3568cf 55%, #16366f 100%);
+  box-shadow:0 0 54px 12px rgba(80,140,255,.22);
+  opacity:.55;animation:float 9s ease-in-out infinite;
+}
+.planet::after{
+  content:"";position:absolute;left:-36px;top:36px;width:190px;height:52px;
+  border:2px solid rgba(160,200,255,.42);border-radius:50%;
+  transform:rotate(-22deg);
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+#app{position:relative;z-index:1}
+
+/* ============ 首页 ============ */
+.home{max-width:820px;margin:0 auto;padding:76px 24px 0;text-align:center}
+
+.home-title{
+  display:inline-block;margin:0;padding-bottom:14px;
+  font-size:29px;font-weight:600;letter-spacing:.04em;color:#dce9ff;
+  border-bottom:2px solid rgba(120,170,255,.55);
+  text-shadow:0 0 24px rgba(90,150,255,.45);
+}
+.home-meta{margin:20px 0 0;font-size:13px;letter-spacing:.05em;color:#9db4dd}
+
+.notice-line{
+  display:inline-flex;align-items:center;gap:8px;
+  margin:22px 0 0;padding:7px 16px;
+  font-size:12.5px;letter-spacing:.05em;color:#a8c6f5;
+  background:rgba(90,145,255,.10);
+  border:1px solid rgba(120,170,255,.22);
+  border-radius:999px;
+}
+.pulse{
+  width:6px;height:6px;border-radius:50%;background:#7fb6ff;
+  box-shadow:0 0 0 0 rgba(127,182,255,.7);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(127,182,255,.6)}
+  70%{box-shadow:0 0 0 8px rgba(127,182,255,0)}
+  100%{box-shadow:0 0 0 0 rgba(127,182,255,0)}
+}
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;max-width:640px;margin:46px auto 0}
+
+.card{
+  display:block;padding:34px 24px 28px;
+  background:linear-gradient(180deg, rgba(30,58,116,.78), rgba(14,30,66,.85));
+  border:1px solid rgba(125,170,255,.20);
+  border-radius:22px;
+  box-shadow:0 18px 45px rgba(0,8,30,.45);
+  backdrop-filter:blur(8px);
+  transition:transform .22s, box-shadow .22s, border-color .22s;
+}
+.card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(140,190,255,.55);
+  box-shadow:0 24px 60px rgba(40,110,255,.32);
+}
+.card-icon{font-size:42px;line-height:1;filter:drop-shadow(0 0 14px rgba(130,180,255,.5))}
+.card-title{margin:16px 0 0;font-size:22px;font-weight:600;color:#eaf2ff;letter-spacing:.02em}
+.card-line{height:1px;background:rgba(140,180,255,.20);margin:18px 0 14px}
+.card-desc{margin:0;font-size:13px;line-height:1.9;color:#9db4dd;letter-spacing:.02em}
+
+/* ============ 持续更新模块 ============ */
+.update-card{
+  grid-column:1/-1;
+  padding:20px 26px 18px;
+  text-align:left;
+  background:linear-gradient(90deg, rgba(48,92,180,.26), rgba(16,34,74,.30));
+  border:1px dashed rgba(125,180,255,.38);
+  border-radius:20px;
+}
+.update-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.update-icon{
+  font-size:26px;line-height:1;
+  filter:drop-shadow(0 0 14px rgba(120,180,255,.55));
+  animation:float 6s ease-in-out infinite;
+}
+.update-text h2{margin:0;font-size:16px;font-weight:600;color:#dce9ff;letter-spacing:.06em}
+.update-text p{margin:4px 0 0;font-size:12.5px;color:#96afd6;letter-spacing:.04em}
+.update-dots{display:inline-flex;gap:5px;margin-left:auto}
+.update-dots i{
+  width:6px;height:6px;border-radius:50%;background:#7fb6ff;
+  animation:dotFade 1.4s ease-in-out infinite;
+}
+.update-dots i:nth-child(2){animation-delay:.2s}
+.update-dots i:nth-child(3){animation-delay:.4s}
+@keyframes dotFade{
+  0%,100%{opacity:.25;transform:scale(.85)}
+  50%{opacity:1;transform:scale(1.15)}
+}
+.update-bar{
+  height:3px;margin-top:14px;
+  border-radius:2px;overflow:hidden;
+  background:rgba(120,170,255,.12);
+}
+.update-bar span{
+  display:block;height:100%;width:35%;
+  background:linear-gradient(90deg,transparent,#8fc4ff,transparent);
+  animation:slide 2.6s linear infinite;
+}
+@keyframes slide{
+  0%{transform:translateX(-120%)}
+  100%{transform:translateX(380%)}
+}
+
+/* ============ 详情页 ============ */
+.work{max-width:1000px;margin:0 auto;padding:40px 24px 0}
+
+.back{
+  display:inline-block;padding:7px 18px;font-size:13.5px;
+  color:#a9c9ff;background:rgba(110,168,255,.14);
+  border:1px solid rgba(120,170,255,.22);
+  border-radius:999px;transition:background .2s;
+}
+.back:hover{background:rgba(110,168,255,.26)}
+
+.work-head{text-align:center;margin:34px 0}
+.work-title{
+  margin:0 0 10px;font-size:32px;font-weight:700;color:#e8f1ff;letter-spacing:.02em;
+  text-shadow:0 0 28px rgba(90,150,255,.4);
+}
+.work-sub{margin:0;font-size:14px;color:#9db4dd;letter-spacing:.03em}
+
+.panel{
+  padding:38px 46px 44px;
+  background:linear-gradient(180deg, rgba(24,48,98,.80), rgba(11,25,56,.88));
+  border:1px solid rgba(125,170,255,.18);
+  border-radius:26px;
+  box-shadow:0 24px 60px rgba(0,8,30,.45);
+  backdrop-filter:blur(8px);
+}
+
+.overview{
+  margin:0 0 34px;padding:18px 22px;
+  font-size:15px;line-height:1.95;color:#cfe0ff;
+  background:rgba(80,140,255,.10);
+  border-left:4px solid #6ea8ff;
+  border-radius:10px;
+}
+.overview strong{color:#a9cbff}
+
+.section-head{
+  display:flex;align-items:center;gap:10px;
+  margin:36px 0 14px;
+  font-size:19px;font-weight:700;color:#dce9ff;
+}
+.dot{
+  display:flex;align-items:center;justify-content:center;flex:0 0 26px;
+  width:26px;height:26px;font-size:13px;font-weight:600;color:#06132c;
+  background:linear-gradient(135deg,#5b9bff,#9ad0ff);
+  border-radius:50%;box-shadow:0 0 16px rgba(90,155,255,.5);
+}
+
+.body-text{margin:0;font-size:15px;line-height:1.95;color:#c6d6f2}
+
+.tip{
+  display:flex;gap:10px;margin:16px 0 0;padding:14px 18px;
+  font-size:14px;color:#b8cdf0;
+  background:rgba(120,170,255,.08);
+  border:1px solid rgba(120,170,255,.18);
+  border-radius:12px;
+}
+.tip p{margin:0;line-height:1.85}
+.tip strong{color:#9ad0ff}
+
+.shots{margin-top:18px;display:grid;gap:14px}
+.shots img{
+  width:100%;display:block;cursor:zoom-in;
+  border:1px solid rgba(140,180,255,.22);
+  border-radius:12px;
+  box-shadow:0 10px 28px rgba(0,8,30,.5);
+}
+
+.sec-emoji{
+  display:flex;align-items:center;gap:8px;
+  margin:46px 0 18px;
+  font-size:18px;font-weight:700;color:#dce9ff;
+}
+
+.log-item{
+  margin-bottom:16px;padding:22px 24px;
+  background:rgba(16,34,74,.55);
+  border:1px solid rgba(125,170,255,.16);
+  border-radius:16px;
+}
+.log-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.log-title{font-size:15px;font-weight:600;color:#e2ecff}
+.tag{
+  padding:3px 10px;font-size:12px;color:#a9c9ff;
+  background:rgba(110,168,255,.16);
+  border:1px solid rgba(120,170,255,.2);
+  border-radius:999px;
+}
+
+/* ============ 页脚 / 放大 ============ */
+.footer{
+  margin-top:56px;padding:26px 0 40px;
+  text-align:center;font-size:12.5px;letter-spacing:.06em;color:#7f96bd;
+  border-top:1px solid rgba(140,180,255,.15);
+}
+
+#zoom{
+  display:none;position:fixed;inset:0;z-index:99;
+  align-items:center;justify-content:center;
+  background:rgba(4,10,24,.94);
+  padding:4vh 4vw;cursor:zoom-out;
+}
+#zoom.open{display:flex}
+#zoom img{max-width:100%;max-height:92vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+
+/* ============ 手机端 ============ */
+@media (max-width:640px){
+  .home{padding-top:48px}
+  .home-title{font-size:21px}
+  .cards{grid-template-columns:1fr;gap:18px;margin-top:34px}
+  .card{padding:26px 20px 22px}
+  .work{padding-top:26px}
+  .work-title{font-size:24px}
+  .panel{padding:24px 18px 30px;border-radius:20px}
+  .section-head{font-size:17px}
+  .body-text{font-size:14.5px}
+  .planet{width:78px;height:78px;opacity:.4}
+  .planet::after{left:-22px;top:24px;width:122px;height:34px}
+  .moon{width:54px;height:54px;top:5vh;right:8vw}
+  .update-card{padding:18px 20px 16px}
+  .update-dots{display:none}
+}
+</style>
 </head>
 <body>
 
-<div id="app"><div class="loading">加载中…</div></div>
-<div id="lightbox"><img alt=""></div>
+<div class="sky">
+  <div id="stars"></div>
+  <div class="moon"></div>
+  <div class="planet"></div>
+</div>
+
+<div id="app"></div>
+<div id="zoom"><img alt=""></div>
 
 <script>
-const app      = document.getElementById('app');
-const lightbox = document.getElementById('lightbox');
+/* ================= 1. 个人信息 ================= */
+const SITE = {
+  name: "孟可欣",
+  studentId: "25108012010",
+  className: "25级数字媒体技术1班",
+  footer: "© 2025 孟可欣 · 25级数字媒体技术1班"
+};
 
-const site  = { name: '', studentId: '', className: '', footer: '' };
-let   works = [];
+/* ================= 2. 作业内容 =================
+   images 里填图片路径，例如 ["assets/img/sofa-01.jpg"]
+   图片放到仓库的 assets/img/ 文件夹
+=============================================== */
+const WORKS = [
+  {
+    id: "computer-set",
+    icon: "💻",
+    title: "电脑三件套",
+    desc: "长方体建模 · 倒角处理 · 阵列复制",
+    overview: "先用长方体确定显示器、主机、键鼠的整体比例，显示器用切角做出边框厚度，键盘用阵列复制键帽，最后统一材质与灯光渲染。",
+    steps: [
+      {
+        title: "显示器：从长方体到屏幕边框",
+        text: "先按屏幕比例调整长方体尺寸，用切角工具处理四条边框，再把正面的面插入后向内挤出，形成内凹的屏幕区域。",
+        tip: "切角数值不要一次给太大，边看边调。",
+        images: []
+      },
+      {
+        title: "主机箱：块面分割与散热孔",
+        text: "主机箱以长方体为主，侧板用插入加挤出做出内凹的散热区，再用阵列复制小圆孔。",
+        tip: "阵列之前先把圆孔塌陷，复制时不容易坐标偏移。",
+        images: []
+      },
+      {
+        title: "键盘与鼠标",
+        text: "键盘底座用切角长方体，键帽做一个后阵列复制；鼠标用球体缩放，再进入多边形层级调整背部弧度。",
+        tip: "键帽阵列用「间距」模式，改尺寸时不容易乱。",
+        images: []
+      },
+      {
+        title: "材质、灯光与渲染",
+        text: "屏幕、金属外壳、塑料键帽分别给材质，布置主光、补光和环境光后渲染输出成品图。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: [
+      {
+        title: "1. 键帽阵列后整体偏右",
+        tag: "阵列轴心不在底座中心",
+        text: "键帽的轴心还留在原点，阵列以它为中心扩散。把轴心改到底座中心后重新阵列就对齐了。",
+        images: []
+      }
+    ]
+  },
+  {
+    id: "cartoon-house",
+    icon: "🏠",
+    title: "卡通小房子",
+    desc: "可编辑多边形 · 挤出屋顶 · 圆角细节",
+    overview: "先从草图确定房子的比例和屋顶坡度，用长方体搭出墙体，屋顶用挤出生成坡面，再补门窗、烟囱等细节，最后用低饱和卡通配色渲染。",
+    steps: [
+      {
+        title: "草图与比例确定",
+        text: "先在纸上定下墙体长宽高、屋顶坡度和门窗位置，建模时照着比例走，不会做到一半发现比例不对。",
+        tip: "草图和透视图对照着看，比凭感觉调快得多。",
+        images: []
+      },
+      {
+        title: "墙体与屋顶",
+        text: "墙体用长方体，把顶面的边向上移动形成屋脊，再用挤出做出坡面，两侧留出屋檐。",
+        tip: "屋檐两边用同一个数值，手动拖拽容易一长一短。",
+        images: []
+      },
+      {
+        title: "门窗与细节装饰",
+        text: "窗户做圆角方框加十字窗棂，门用薄板嵌入墙体，再补上烟囱、台阶和小围栏。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "材质、灯光与渲染",
+        text: "墙面米白、屋顶砖红，材质带一点粗糙度，用天光加一盏平行光打出柔和阴影。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: []
+  },
+  {
+    id: "sofa",
+    icon: "🛋️",
+    title: "沙发",
+    desc: "切角底座 · 多边形编辑 · 镜像复制",
+    overview: "用正方体做底座，切角让棱角变圆润，进入多边形编辑调整顶点与线，做出座面、扶手和靠背的体积，最后用细分配合布料材质表现软包。",
+    steps: [
+      {
+        title: "沙发底座：切角让棱角变圆润",
+        text: "对正方体的四条垂直边和上边做切角。幅度过大底座会显得松软，过小又不够圆润，试几次才找到合适的数值。",
+        tip: "切角后配合平滑组，表面过渡更自然。",
+        images: []
+      },
+      {
+        title: "沙发形状：调整顶点与线",
+        text: "进入多边形编辑，选中需要外扩或内收的顶点调整位置，再配合边线的缩放和移动，让座面、扶手和靠背过渡更自然。",
+        tip: "多用正视图和侧视图对照，做一半再镜像复制。",
+        images: []
+      },
+      {
+        title: "坐垫与靠背：软包体积",
+        text: "坐垫用细分做出鼓起的体积，接缝处压出线槽，靠背复制后旋转贴合到扶手上方。",
+        tip: "细分级别先低后高，否则改起来非常卡。",
+        images: []
+      },
+      {
+        title: "材质、灯光与渲染",
+        text: "布料材质加细微凹凸和高光衰减，用柔光箱布光，靠明暗过渡表现软包体积。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: [
+      {
+        title: "1. 镜像复制后接缝处错位",
+        tag: "轴心点不在中线",
+        text: "镜像以轴心为基准，轴心不在中线导致错位。把轴心对齐中线后重新镜像，接缝完全贴合。",
+        images: []
+      },
+      {
+        title: "2. 细分之后模型过于圆滑",
+        tag: "没有卡线",
+        text: "在需要保持硬度的边旁边加支撑线，细分后边缘既有圆角又保留轮廓。",
+        images: []
+      }
+    ]
+  }
+];
 
-/* ---------- 小工具 ---------- */
-const esc = s => String(s ?? '').replace(/[&<>"]/g,
-  c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+/* ================= 3. 星空 ================= */
+(function stars(){
+  const box = document.getElementById('stars');
+  for (let i = 0; i < 90; i++){
+    const s = document.createElement('span');
+    const size = (Math.random() * 2 + 1).toFixed(1);
+    s.style.left = (Math.random() * 100).toFixed(2) + '%';
+    s.style.top  = (Math.random() * 100).toFixed(2) + '%';
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.opacity = (0.3 + Math.random() * 0.7).toFixed(2);
+    s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+    box.appendChild(s);
+  }
+})();
 
-const imgList = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+/* ================= 4. 渲染逻辑（不用改） ================= */
+const app  = document.getElementById('app');
+const zoom = document.getElementById('zoom');
 
-function shots(list){
-  const imgs = imgList(list);
-  if (!imgs.length) return '';
-  return `<div class="shots">${imgs.map(src =>
-    `<img src="${esc(src)}" alt="" loading="lazy">`).join('')}</div>`;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toArr = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+
+function shots(v){
+  const a = toArr(v);
+  if (!a.length) return '';
+  return `<div class="shots">${a.map(src => `<img src="${esc(src)}" alt="" loading="lazy">`).join('')}</div>`;
 }
 
-/* ---------- 首页 ---------- */
 function renderHome(){
-  document.title = `${site.name} · 三维建模作业`;
-
-  const cards = works.map(w => `
+  document.title = SITE.name + ' · 三维建模作业';
+  const cards = WORKS.map(w => `
     <a class="card" href="#/${esc(w.id)}">
-      <div class="card-icon">${esc(w.icon) || '📦'}</div>
+      <div class="card-icon">${esc(w.icon)}</div>
       <h2 class="card-title">${esc(w.title)}</h2>
       <div class="card-line"></div>
       <p class="card-desc">${esc(w.desc)}</p>
     </a>`).join('');
 
   app.innerHTML = `
-  <div class="home">
-    <header class="home-head">
-      <h1 class="home-title">✦ 欢迎来到${esc(site.name)}的个人网站 ✦</h1>
-      <p class="home-meta">姓名：${esc(site.name)} · 学号：${esc(site.studentId)} · ${esc(site.className)}</p>
-    </header>
+    <div class="home">
+      <header>
+        <h1 class="home-title">✦ ${esc(SITE.name)}的个人网站 ✦</h1>
+        <p class="home-meta">姓名：${esc(SITE.name)} · 学号：${esc(SITE.studentId)} · ${esc(SITE.className)}</p>
+        <p class="notice-line"><span class="pulse"></span>若无内容，请刷新等待</p>
+      </header>
 
-    <div class="cards">${cards || '<p class="empty">还没有作业，去后台添加吧</p>'}</div>
+      <div class="cards">
+        ${cards}
 
-    <footer class="footer">${esc(site.footer)}</footer>
-  </div>`;
+        <div class="update-card">
+          <div class="update-row">
+            <span class="update-icon">🛰️</span>
+            <div class="update-text">
+              <h2>持续更新中</h2>
+              <p>新的作业会陆续上传到这里</p>
+            </div>
+            <span class="update-dots"><i></i><i></i><i></i></span>
+          </div>
+          <div class="update-bar"><span></span></div>
+        </div>
+      </div>
+
+      <footer class="footer">${esc(SITE.footer)}</footer>
+    </div>`;
 }
 
-/* ---------- 作业详情 ---------- */
 function renderWork(w){
-  document.title = `${w.title}建模记录 · ${site.name}`;
+  document.title = w.title + '建模记录 · ' + SITE.name;
 
   const steps = (w.steps || []).map((s, i) => `
     <h2 class="section-head"><span class="dot">${i + 1}</span>${esc(s.title)}</h2>
     <p class="body-text">${esc(s.text)}</p>
-    ${s.tip ? `<div class="tip"><span class="tip-icon">💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
+    ${s.tip ? `<div class="tip"><span>💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
     ${shots(s.images)}`).join('');
 
   const logs = (w.logs || []).map(l => `
@@ -77,67 +509,37 @@ function renderWork(w){
     </div>`).join('');
 
   app.innerHTML = `
-  <div class="work">
-    <a class="back" href="#/">← 返回首页</a>
-
-    <header class="work-head">
-      <h1 class="work-title">${esc(w.icon)} ${esc(w.title)}建模记录</h1>
-      <p class="work-sub">${esc(site.name)} · ${esc(site.studentId)} · 三维建模作业</p>
-    </header>
-
-    <article class="panel">
-      ${w.overview ? `<div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>` : ''}
-      ${steps}
-      ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
-    </article>
-
-    <footer class="footer">${esc(site.footer)}</footer>
-  </div>`;
+    <div class="work">
+      <a class="back" href="#/">← 返回首页</a>
+      <header class="work-head">
+        <h1 class="work-title">${esc(w.icon)} ${esc(w.title)}建模记录</h1>
+        <p class="work-sub">${esc(SITE.name)} · ${esc(SITE.studentId)} · 三维建模作业</p>
+      </header>
+      <article class="panel">
+        <div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>
+        ${steps}
+        ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
+      </article>
+      <footer class="footer">${esc(SITE.footer)}</footer>
+    </div>`;
 }
 
-/* ---------- 路由 ---------- */
 function render(){
   const id = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
-  const work = works.find(w => w.id === id);
-  work ? renderWork(work) : renderHome();
+  const w = WORKS.find(x => x.id === id);
+  w ? renderWork(w) : renderHome();
   window.scrollTo(0, 0);
 }
 
 window.addEventListener('hashchange', render);
 
-/* ---------- 点击图片放大 ---------- */
 document.addEventListener('click', e => {
   const img = e.target.closest('.shots img');
-  if (img){
-    lightbox.firstElementChild.src = img.src;
-    lightbox.classList.add('open');
-  } else if (e.target.closest('#lightbox')){
-    lightbox.classList.remove('open');
-  }
+  if (img){ zoom.firstElementChild.src = img.src; zoom.classList.add('open'); }
+  else if (e.target.closest('#zoom')) zoom.classList.remove('open');
 });
 
-/* ---------- 启动：读取 JSON ---------- */
-(async function boot(){
-  try{
-    const [s, w] = await Promise.all([
-      fetch('content/site.json',  { cache: 'no-cache' }).then(r => r.json()),
-      fetch('content/works.json', { cache: 'no-cache' }).then(r => r.json())
-    ]);
-    Object.assign(site, s);
-    works = Array.isArray(w) ? w : [];
-    render();
-  }catch (err){
-    app.innerHTML = `
-      <div class="error">
-        <h2>内容读取失败</h2>
-        <p>如果你是直接双击打开 index.html，浏览器会拦截本地 JSON 读取（CORS 限制），这是正常现象。</p>
-        <p>请用本地服务器预览：在项目文件夹里执行</p>
-        <pre>python -m http.server 8000</pre>
-        <p>然后打开 <code>http://localhost:8000</code></p>
-        <p class="err-detail">错误信息：${esc(err.message)}</p>
-      </div>`;
-  }
-})();
+render();
 </script>
 </body>
 </html>
