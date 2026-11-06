@@ -598,7 +598,10 @@ let controls = null;
 let model = null;
 let host = null;
 let raf = 0;
-let wire = false;
+
+let edgeLines = [];   // 边线对象
+let meshMats  = [];   // 模型材质
+let edgeOn    = false;
 
 function disposeAll(){
   if (raf){ cancelAnimationFrame(raf); raf = 0; }
@@ -611,6 +614,8 @@ function disposeAll(){
   }
   model = null;
   controls = null;
+  edgeLines = [];
+  meshMats = [];
 }
 
 function frameModel(){
@@ -626,6 +631,30 @@ function frameModel(){
   camera.position.set(size * 0.75, size * 0.55, size * 1.0);
   controls.target.set(0, 0, 0);
   controls.update();
+}
+
+/* 为每个网格生成“结构边”，忽略平面上的三角对角线 */
+function buildEdges(root){
+  edgeLines = [];
+  meshMats  = [];
+
+  const meshes = [];
+  root.traverse(o => { if (o.isMesh && o.geometry) meshes.push(o); });
+
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0x9fd4ff, transparent: true, opacity: 0.85
+  });
+
+  meshes.forEach(mesh => {
+    (Array.isArray(mesh.material) ? mesh.material : [mesh.material])
+      .forEach(m => meshMats.push(m));
+
+    const edges = new THREE.EdgesGeometry(mesh.geometry, 18);  // 18 度以下不画
+    const line  = new THREE.LineSegments(edges, lineMat);
+    line.visible = false;
+    mesh.add(line);          // 挂在网格下，自动跟随位置/缩放
+    edgeLines.push(line);
+  });
 }
 
 function init(url){
@@ -663,6 +692,7 @@ function init(url){
   new GLTFLoader().load(url, gltf => {
     model = gltf.scene;
     scene.add(model);
+    buildEdges(model);
     frameModel();
   }, undefined, err => {
     host.innerHTML = '<div class="mv-err">模型加载失败：' +
@@ -695,25 +725,15 @@ window.mvRotate = () => {
   return controls.autoRotate;
 };
 
+/* 线框：隐藏实体面，只显示结构边 */
 window.mvWire = () => {
   if (!model) return false;
-  wire = !wire;
+  edgeOn = !edgeOn;
 
-  const mats = new Set();
-  model.traverse(o => {
-    if (o.isMesh && o.material){
-      (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => mats.add(m));
-    }
-  });
+  edgeLines.forEach(l => { l.visible = edgeOn; });
+  meshMats.forEach(m => { m.visible = !edgeOn; });
 
-  mats.forEach(m => {
-    if ('wireframe' in m){
-      m.wireframe = wire;
-      m.needsUpdate = true;
-    }
-  });
-
-  return wire;
+  return edgeOn;
 };
 
 window.mvReset = () => {
@@ -723,5 +743,6 @@ window.mvReset = () => {
 
 if (window.__modelUrl) init(window.__modelUrl);
 </script>
+
 </body>
 </html>
