@@ -118,9 +118,20 @@ a{color:inherit;text-decoration:none}
 }
 @keyframes slide{0%{transform:translateX(-120%)}100%{transform:translateX(380%)}}
 
+/* 模型说明 */
+.declare{
+  max-width:640px;margin:26px auto 0;padding:18px 22px;text-align:left;
+  background:rgba(80,140,255,.08);
+  border:1px dashed rgba(125,180,255,.32);
+  border-radius:16px;
+  font-size:13px;line-height:1.9;color:#a9c2e6;
+}
+.declare h2{margin:0 0 8px;font-size:14px;font-weight:600;color:#dce9ff;letter-spacing:.04em}
+.declare b{color:#dce9ff}
+
 /* 留言 */
 .msg-box{
-  max-width:640px;margin:44px auto 0;padding:24px 26px;text-align:left;
+  max-width:640px;margin:22px auto 0;padding:24px 26px;text-align:left;
   background:linear-gradient(180deg,rgba(24,48,98,.7),rgba(11,25,56,.85));
   border:1px solid rgba(125,170,255,.18);border-radius:20px;
 }
@@ -170,6 +181,7 @@ a{color:inherit;text-decoration:none}
 }
 .mv-bar button:hover{background:rgba(60,110,200,.55)}
 .mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
+.mv-hint{position:absolute;right:14px;bottom:16px;margin:0;font-size:11.5px;color:#8fa8cf;z-index:2}
 
 .section-head{display:flex;align-items:center;gap:10px;margin:36px 0 14px;font-size:19px;font-weight:700;color:#dce9ff}
 .dot{
@@ -228,6 +240,7 @@ a{color:inherit;text-decoration:none}
   .update-card{padding:18px 20px 16px}
   .update-dots{display:none}
   .mv-host{height:320px}
+  .mv-hint{display:none}
 }
 </style>
 </head>
@@ -256,44 +269,49 @@ const SITE = {
 const WORKS = [
   {
     id: "computer-set",
-    icon: "💻",
+    icon: "🖱️",
     title: "电脑三件套",
-    desc: "长方体建模 · 倒角处理 · 阵列复制",
-    overview: "先用长方体确定显示器、主机、键鼠的整体比例，显示器用切角做出边框厚度，键盘用阵列复制键帽，最后统一材质与灯光渲染。",
+    desc: "鼠标：长方体 · 切角 · 涡轮平滑",
+    overview: "电脑三件套先从鼠标做起。用一个长方体加切角修改器起形，再用晶格和涡轮平滑做出圆润的握感；接着在按键位置分出左右键缝隙，最后加滚轮和材质。过程中最费时间的是分缝处的面——出现过破面和法线反向，靠翻转法线、移动面和塌陷才修好。",
     steps: [
       {
-        title: "显示器：从长方体到屏幕边框",
-        text: "先按屏幕比例调整长方体尺寸，用切角工具处理四条边框，再把正面的面插入后向内挤出，形成内凹的屏幕区域。",
-        tip: "切角数值不要一次给太大，边看边调。",
+        title: "上传参考图",
+        text: "先找一张鼠标的正视图和侧视图作为参考，重点看长宽比例、背部最高点的位置，以及左右键缝隙的走向。把参考图放进视口对齐之后再动手，比凭感觉做要准得多。",
+        tip: "参考图可以设为视口背景（Alt+B），按 F3 / F4 随时切换线框，方便对形。",
         images: []
       },
       {
-        title: "主机箱：块面分割与散热孔",
-        text: "主机箱以长方体为主，侧板用插入加挤出做出内凹的散热区，再用阵列复制小圆孔。",
-        tip: "阵列之前先把圆孔塌陷，复制时不容易坐标偏移。",
+        title: "长方体加切角修改器",
+        text: "鼠标的形体从一个长方体开始。先按参考图的比例调好长、宽、高，再添加「切角（Chamfer）修改器」，把四条垂直边和一个顶面切出圆角，得到一个圆润的楔形，这就是握感的基础。",
+        tip: "切角分段先给 2~3 段就够，段数太多后面调形会很卡；不够再往上加。",
         images: []
       },
       {
-        title: "键盘与鼠标",
-        text: "键盘底座用切角长方体，键帽做一个后阵列复制；鼠标用球体缩放，再进入多边形层级调整背部弧度。",
-        tip: "键帽阵列用「间距」模式，改尺寸时不容易乱。",
+        title: "晶格与涡轮平滑",
+        text: "接着加「晶格（Lattice）修改器」检查整体布线是否均匀，再叠加「涡轮平滑（TurboSmooth）」把表面变圆润。这一步主要看哪里网格挤在一起——线太密的位置，后面很容易鼓包或者破面。",
+        tip: "涡轮平滑迭代次数先别超过 2，确认大形没问题再往上加，否则改起来非常卡。",
         images: []
       },
       {
-        title: "材质、灯光与渲染",
-        text: "屏幕、金属外壳、塑料键帽分别给材质，布置主光、补光和环境光后渲染输出成品图。",
-        tip: "",
+        title: "分出左右键区域",
+        text: "进入多边形层级，选择鼠标前部对应的边，先「切角」把这些边分开，形成左右键的分缝；再选中按键区域的面，沿局部法线向里「挤出」一点，做出按键的高度差；最后对新边缘再切一次角，让缝隙有细微的倒角过渡，不至于生硬。",
+        tip: "挤出的方向一定选「局部法线」，用「组」方向会把缝隙拉歪。分缝处的面容易出问题，做完就顺手检查一遍。",
+        images: []
+      },
+      {
+        title: "修掉破面：翻转法线、移动面、塌陷",
+        text: "分缝做完后，缝隙附近出现了几块发黑、朝里的面（第二张截图记录的就是这个状态）。处理办法是：先选中问题面「翻转」法线，再把挤出的面往回移动一点，让它和相邻面对齐；最后用「塌陷」把多余的细分点收掉，面就基本恢复正常了。",
+        tip: "判断黑面原因：把视口的「背面消隐」关掉，如果黑面消失，就是法线反了；如果还在黑，是两块面重合。",
+        images: []
+      },
+      {
+        title: "添加滚轮与材质",
+        text: "滚轮用一个圆柱体压扁后放进分缝中间，位置略低于按键表面；然后统一给材质：外壳用浅灰色塑料，滚轮用深色橡胶，整体带一点粗糙度。左右键缝隙那里到现在还是有一点点不平整，属于这次留下的遗憾，后面再继续调。",
+        tip: "材质尽量用「物理材质」，V-Ray 材质导出 glb 会丢失，网页上会变成纯白。",
         images: []
       }
     ],
-    logs: [
-      {
-        title: "1. 键帽阵列后整体偏右",
-        tag: "阵列轴心不在底座中心",
-        text: "键帽的轴心还留在原点，阵列以它为中心扩散。把轴心改到底座中心后重新阵列就对齐了。",
-        images: []
-      }
-    ]
+    logs: []
   },
   {
     id: "cartoon-house",
@@ -453,6 +471,11 @@ function renderHome(){
         </div>
       </div>
 
+      <section class="declare">
+        <h2>📌 模型说明</h2>
+        <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度；点击「线框」可切换查看网格结构。模型加载需要一点时间，若详情页暂时空白，请稍候或刷新页面。</p>
+      </section>
+
       <section class="msg-box">
         <h2>💬 留言与改善建议</h2>
         <p class="msg-tip">欢迎留下改进建议，我会据此继续修改。</p>
@@ -505,6 +528,7 @@ function renderWork(w){
             <button data-mv="wire">线框</button>
             <button data-mv="reset">复位</button>
           </div>
+          <p class="mv-hint">拖动旋转 · 滚轮缩放</p>
         </div>` : ''}
 
         ${steps}
@@ -514,7 +538,6 @@ function renderWork(w){
       <footer class="footer">${esc(SITE.footer)}</footer>
     </div>`;
 
-  /* 启动 3D 视窗 */
   if (w.model){
     if (window.loadViewer) window.loadViewer(w.model);
     else window.__modelUrl = w.model;
@@ -599,8 +622,8 @@ let model = null;
 let host = null;
 let raf = 0;
 
-let edgeLines = [];   // 边线对象
-let meshMats  = [];   // 模型材质
+let edgeLines = [];
+let meshMats  = [];
 let edgeOn    = false;
 
 function disposeAll(){
@@ -633,7 +656,7 @@ function frameModel(){
   controls.update();
 }
 
-/* 为每个网格生成“结构边”，忽略平面上的三角对角线 */
+/* 生成结构边：只画转角，平面里的三角对角线不画 */
 function buildEdges(root){
   edgeLines = [];
   meshMats  = [];
@@ -649,10 +672,10 @@ function buildEdges(root){
     (Array.isArray(mesh.material) ? mesh.material : [mesh.material])
       .forEach(m => meshMats.push(m));
 
-    const edges = new THREE.EdgesGeometry(mesh.geometry, 10);  // 18 度以下不画
+    const edges = new THREE.EdgesGeometry(mesh.geometry, 18);
     const line  = new THREE.LineSegments(edges, lineMat);
     line.visible = false;
-    mesh.add(line);          // 挂在网格下，自动跟随位置/缩放
+    mesh.add(line);
     edgeLines.push(line);
   });
 }
@@ -725,14 +748,11 @@ window.mvRotate = () => {
   return controls.autoRotate;
 };
 
-/* 线框：隐藏实体面，只显示结构边 */
 window.mvWire = () => {
   if (!model) return false;
   edgeOn = !edgeOn;
-
   edgeLines.forEach(l => { l.visible = edgeOn; });
   meshMats.forEach(m => { m.visible = !edgeOn; });
-
   return edgeOn;
 };
 
@@ -743,6 +763,5 @@ window.mvReset = () => {
 
 if (window.__modelUrl) init(window.__modelUrl);
 </script>
-
 </body>
 </html>
