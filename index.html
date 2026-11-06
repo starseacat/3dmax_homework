@@ -649,7 +649,7 @@ function buildEdges(root){
     (Array.isArray(mesh.material) ? mesh.material : [mesh.material])
       .forEach(m => meshMats.push(m));
 
-    const edges = new THREE.EdgesGeometry(mesh.geometry, 18);  // 18 度以下不画
+    const edges = new THREE.EdgesGeometry(mesh.geometry, 10);  // 18 度以下不画
     const line  = new THREE.LineSegments(edges, lineMat);
     line.visible = false;
     mesh.add(line);          // 挂在网格下，自动跟随位置/缩放
