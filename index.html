@@ -725,7 +725,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const loader = new GLTFLoader();
-const EDGE_ANGLE = 10;      // 越小越不容易漏线
+const EDGE_ANGLE = 10;        // 越小线越全
 
 /* =========================================================
    一、详情页的大查看器
@@ -781,18 +781,30 @@ function buildEdges(root){
   root.traverse(o => { if (o.isMesh && o.geometry) meshes.push(o); });
 
   const lineMat = new THREE.LineBasicMaterial({
-    color: 0xa3d2ff, transparent: true, opacity: 0.9
+    color: 0xb9dcff, transparent: true, opacity: 1
   });
 
   meshes.forEach(mesh => {
-    (Array.isArray(mesh.material) ? mesh.material : [mesh.material])
-      .forEach(m => meshMats.push(m));
+    (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => {
+      if (!m || !m.userData) return;
+      if (!m.userData.__saved){
+        m.userData.__saved = {
+          opacity:    m.opacity,
+          transparent:m.transparent,
+          depthWrite: m.depthWrite
+        };
+      }
+      meshMats.push(m);
+    });
 
     const edges = new THREE.EdgesGeometry(mesh.geometry, EDGE_ANGLE);
-    const line  = new THREE.LineSegments(edges, lineMat);
-    line.visible = false;
-    mesh.add(line);
-    edgeLines.push(line);
+    if (edges.attributes.position && edges.attributes.position.count){
+      const line = new THREE.LineSegments(edges, lineMat);
+      line.visible = false;
+      line.renderOrder = 2;
+      mesh.add(line);
+      edgeLines.push(line);
+    }
   });
 }
 
@@ -826,7 +838,7 @@ function init(url){
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 1.4;
+  controls.autoRotateSpeed = 1.2;
 
   loader.load(url, gltf => {
     model = gltf.scene;
@@ -864,11 +876,28 @@ window.mvRotate = () => {
   return controls.autoRotate;
 };
 
+/* 线框：保留极淡的外壳 + 结构边，模型不会“消失” */
 window.mvWire = () => {
   if (!model) return false;
   edgeOn = !edgeOn;
+
   edgeLines.forEach(l => { l.visible = edgeOn; });
-  meshMats.forEach(m => { m.visible = !edgeOn; });
+
+  meshMats.forEach(m => {
+    const s = m.userData && m.userData.__saved;
+    if (!s) return;
+    if (edgeOn){
+      m.transparent = true;
+      m.opacity     = 0.12;
+      m.depthWrite  = false;
+    } else {
+      m.transparent = s.transparent;
+      m.opacity     = s.opacity;
+      m.depthWrite  = s.depthWrite;
+    }
+    m.needsUpdate = true;
+  });
+
   return edgeOn;
 };
 
@@ -878,7 +907,7 @@ window.mvReset = () => {
 };
 
 /* =========================================================
-   二、首页卡片上的小模型（自动旋转）
+   二、首页卡片上的小模型（自动旋转，速度减半）
    ========================================================= */
 const cardViews = [];
 let cardsLoop = false;
@@ -928,7 +957,7 @@ function createCard(hostEl){
 
     if (cover) cover.classList.add('ready');
   }, undefined, () => {
-    if (cover) cover.classList.remove('ready');   // 失败就保留 emoji
+    if (cover) cover.classList.remove('ready');
   });
 
   cardViews.push({ host: hostEl, renderer: r, scene: s, camera: c, group });
@@ -938,7 +967,7 @@ function animateCards(){
   requestAnimationFrame(animateCards);
   for (const v of cardViews){
     if (!document.body.contains(v.host)) continue;
-    v.group.rotation.y += 0.009;
+    v.group.rotation.y += 0.0045;      // 原来 0.009，现在减半
     v.renderer.render(v.scene, v.camera);
   }
 }
@@ -969,10 +998,11 @@ window.addEventListener('resize', () => {
 });
 
 /* =========================================================
-   三、首次加载的兜底
+   三、首次加载兜底
    ========================================================= */
 if (window.__modelUrl) init(window.__modelUrl);
 initCards();
 </script>
+
 </body>
 </html>
