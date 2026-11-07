@@ -1,3 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>孟可欣 · 三维建模作业</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;min-height:100vh;color:#e8f0ff;line-height:1.8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1100px 760px at 12% -12%, #1b3c7a 0%, transparent 58%),
+    radial-gradient(900px 700px at 92% 4%, #143a72 0%, transparent 55%),
+    linear-gradient(180deg,#060f24 0%,#0a1a3d 45%,#07132c 100%);
+  background-attachment:fixed;
+}
+a{color:inherit;text-decoration:none}
+
+/* ============ 星空 ============ */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#stars span{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3.6s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+
+.moon{
+  position:absolute;top:8vh;right:9vw;width:76px;height:76px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #f2f8ff, #c3d8f7 58%, #8fb3e0 100%);
+  box-shadow:0 0 46px 10px rgba(160,200,255,.38), inset -10px -8px 16px rgba(90,130,190,.35);
+  opacity:.92;
+}
+.moon::before,.moon::after{content:"";position:absolute;border-radius:50%;background:rgba(120,152,196,.35)}
+.moon::before{width:14px;height:14px;top:16px;left:20px}
+.moon::after{width:9px;height:9px;top:44px;left:48px}
+
+.planet{
+  position:absolute;left:5vw;bottom:8vh;width:118px;height:118px;border-radius:50%;
+  background:radial-gradient(circle at 30% 26%, #8dbaff, #3568cf 55%, #16366f 100%);
+  box-shadow:0 0 54px 12px rgba(80,140,255,.22);
+  opacity:.55;animation:float 9s ease-in-out infinite;
+}
+.planet::after{
+  content:"";position:absolute;left:-36px;top:36px;width:190px;height:52px;
+  border:2px solid rgba(160,200,255,.42);border-radius:50%;transform:rotate(-22deg);
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+#app{position:relative;z-index:1}
+
+/* ============ 首页 ============ */
+.home{max-width:820px;margin:0 auto;padding:76px 24px 0;text-align:center}
+.home-title{
+  display:inline-block;margin:0;padding-bottom:14px;
+  font-size:29px;font-weight:600;letter-spacing:.04em;color:#dce9ff;
+  border-bottom:2px solid rgba(120,170,255,.55);
+  text-shadow:0 0 24px rgba(90,150,255,.45);
+}
+.home-meta{margin:20px 0 0;font-size:13px;letter-spacing:.05em;color:#9db4dd}
+.notice-line{
+  display:inline-flex;align-items:center;gap:8px;
+  margin:22px 0 0;padding:7px 16px;
+  font-size:12.5px;letter-spacing:.05em;color:#a8c6f5;
+  background:rgba(90,145,255,.10);
+  border:1px solid rgba(120,170,255,.22);
+  border-radius:999px;
+}
+.pulse{width:6px;height:6px;border-radius:50%;background:#7fb6ff;animation:pulse 2s infinite}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(127,182,255,.6)}
+  70%{box-shadow:0 0 0 8px rgba(127,182,255,0)}
+  100%{box-shadow:0 0 0 0 rgba(127,182,255,0)}
+}
+
+/* ============ 星星挂纸条 · 模型说明 ============ */
+.note{
+  width:100%;max-width:620px;margin:40px auto 0;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.note-star{
+  font-size:30px;line-height:1;color:#e4f0ff;
+  text-shadow:0 0 16px rgba(160,205,255,.95), 0 0 44px rgba(90,150,255,.6);
+  animation:starPulse 3.6s ease-in-out infinite;
+}
+@keyframes starPulse{
+  0%,100%{transform:scale(1) rotate(0deg);opacity:.9}
+  50%{transform:scale(1.14) rotate(8deg);opacity:1}
+}
+.note-thread{
+  width:2px;height:28px;
+  background:linear-gradient(180deg,rgba(205,228,255,.9),rgba(205,228,255,.12));
+}
+.note-paper{
+  position:relative;width:100%;
+  padding:20px 22px 18px;text-align:left;color:#1b2c4a;
+  background:linear-gradient(180deg,#fcfdff,#e9f1ff);
+  border:1px solid rgba(160,195,240,.85);
+  border-radius:10px;
+  box-shadow:0 20px 44px rgba(0,10,35,.45), inset 0 0 0 1px rgba(255,255,255,.7);
+  transform:rotate(-1.4deg);
+}
+.note-paper::before{
+  content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+  width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffffff,#a3c5ef 60%,#6d95c8);
+  box-shadow:0 2px 6px rgba(0,10,35,.45);
+}
+.note-paper::after{
+  content:"";position:absolute;right:0;bottom:0;
+  border-width:0 0 16px 16px;border-style:solid;
+  border-color:transparent transparent #d3e3fa transparent;
+}
+.note-paper h2{margin:0 0 10px;font-size:14.5px;font-weight:700;color:#12365e;letter-spacing:.05em}
+.note-paper p{margin:0 0 8px;font-size:12.5px;line-height:2;color:#3a5070}
+.note-paper p:last-child{margin-bottom:0}
+.note-paper b{color:#12365e}
+
+@media (min-width:1420px){
+  .note{
+    position:fixed;top:120px;right:28px;
+    width:252px;max-width:none;margin:0;z-index:5;
+  }
+  .note-paper{transform:rotate(-2.4deg)}
+}
+
+/* ============ 卡片 ============ */
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;max-width:640px;margin:44px auto 0}
+.card{
+  display:block;padding:16px 16px 24px;
+  background:linear-gradient(180deg, rgba(30,58,116,.78), rgba(14,30,66,.85));
+  border:1px solid rgba(125,170,255,.20);
+  border-radius:22px;
+  box-shadow:0 18px 45px rgba(0,8,30,.45);
+  backdrop-filter:blur(8px);
+  transition:transform .22s, box-shadow .22s, border-color .22s;
+}
+.card:hover{transform:translateY(-6px);border-color:rgba(140,190,255,.55);box-shadow:0 24px 60px rgba(40,110,255,.32)}
+
+.card-cover{
+  position:relative;height:156px;border-radius:16px;overflow:hidden;
+  background:radial-gradient(circle at 50% 58%, rgba(70,125,215,.38), rgba(10,22,50,.25));
+  border:1px solid rgba(125,170,255,.14);
+}
+.card-3d{position:absolute;inset:0}
+.card-3d canvas{display:block}
+.card-emoji{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:40px;line-height:1;
+  filter:drop-shadow(0 0 14px rgba(130,180,255,.5));
+  transition:opacity .35s ease;
+}
+.card-cover.ready .card-emoji{opacity:0}
+.card-cover.ready::after{
+  content:"拖动查看";position:absolute;left:10px;bottom:8px;
+  font-size:10.5px;color:rgba(180,210,255,.55);letter-spacing:.08em;
+}
+
+.card-title{margin:16px 0 0;font-size:21px;font-weight:600;color:#eaf2ff;letter-spacing:.02em}
+.card-line{height:1px;background:rgba(140,180,255,.20);margin:16px 0 12px}
+.card-desc{margin:0;font-size:12.5px;line-height:1.9;color:#9db4dd;letter-spacing:.02em}
+
+/* ============ 持续更新 ============ */
+.update-card{
+  grid-column:1/-1;padding:20px 26px 18px;text-align:left;
+  background:linear-gradient(90deg, rgba(48,92,180,.26), rgba(16,34,74,.30));
+  border:1px dashed rgba(125,180,255,.38);border-radius:20px;
+}
+.update-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.update-icon{font-size:26px;line-height:1;filter:drop-shadow(0 0 14px rgba(120,180,255,.55));animation:float 6s ease-in-out infinite}
+.update-text h2{margin:0;font-size:16px;font-weight:600;color:#dce9ff;letter-spacing:.06em}
+.update-text p{margin:4px 0 0;font-size:12.5px;color:#96afd6;letter-spacing:.04em}
+.update-dots{display:inline-flex;gap:5px;margin-left:auto}
+.update-dots i{width:6px;height:6px;border-radius:50%;background:#7fb6ff;animation:dotFade 1.4s ease-in-out infinite}
+.update-dots i:nth-child(2){animation-delay:.2s}
+.update-dots i:nth-child(3){animation-delay:.4s}
+@keyframes dotFade{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+.update-bar{height:3px;margin-top:14px;border-radius:2px;overflow:hidden;background:rgba(120,170,255,.12)}
+.update-bar span{
+  display:block;height:100%;width:35%;
+  background:linear-gradient(90deg,transparent,#8fc4ff,transparent);
+  animation:slide 2.6s linear infinite;
+}
+@keyframes slide{0%{transform:translateX(-120%)}100%{transform:translateX(380%)}}
+
+/* ============ 留言 ============ */
+.msg-box{
+  max-width:640px;margin:22px auto 0;padding:24px 26px;text-align:left;
+  background:linear-gradient(180deg,rgba(24,48,98,.7),rgba(11,25,56,.85));
+  border:1px solid rgba(125,170,255,.18);border-radius:20px;
+}
+.msg-box h2{margin:0 0 6px;font-size:16px;font-weight:600;color:#dce9ff}
+.msg-tip{margin:0 0 14px;font-size:12.5px;color:#96afd6}
+.mail-btn{
+  display:block;padding:12px;text-align:center;
+  font-size:14px;font-weight:600;color:#04122c;
+  background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-radius:10px;
+}
+
+/* ============ 详情页 ============ */
+.work{max-width:1000px;margin:0 auto;padding:40px 24px 0}
+.back{
+  display:inline-block;padding:7px 18px;font-size:13.5px;color:#a9c9ff;
+  background:rgba(110,168,255,.14);border:1px solid rgba(120,170,255,.22);border-radius:999px;
+}
+.back:hover{background:rgba(110,168,255,.26)}
+.work-head{text-align:center;margin:34px 0}
+.work-title{margin:0 0 10px;font-size:32px;font-weight:700;color:#e8f1ff;text-shadow:0 0 28px rgba(90,150,255,.4)}
+.work-sub{margin:0;font-size:14px;color:#9db4dd}
+.panel{
+  padding:38px 46px 44px;
+  background:linear-gradient(180deg, rgba(24,48,98,.80), rgba(11,25,56,.88));
+  border:1px solid rgba(125,170,255,.18);border-radius:26px;
+  box-shadow:0 24px 60px rgba(0,8,30,.45);backdrop-filter:blur(8px);
+}
+.overview{
+  margin:0 0 34px;padding:18px 22px;font-size:15px;line-height:1.95;color:#cfe0ff;
+  background:rgba(80,140,255,.10);border-left:4px solid #6ea8ff;border-radius:10px;
+}
+.overview strong{color:#a9cbff}
+
+.viewer{
+  position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
+  border:1px solid rgba(125,170,255,.18);
+  background:radial-gradient(circle at 50% 40%, rgba(40,80,160,.35), rgba(8,20,44,.7));
+}
+.mv-host{width:100%;height:460px}
+.mv-host canvas{display:block}
+.mv-err{padding:60px 20px;text-align:center;font-size:13px;color:#ffb3b3}
+.mv-bar{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;z-index:2}
+.mv-bar button{
+  padding:6px 13px;font-size:12.5px;color:#cfe0ff;cursor:pointer;
+  background:rgba(10,24,52,.78);border:1px solid rgba(125,170,255,.3);border-radius:999px;
+}
+.mv-bar button:hover{background:rgba(60,110,200,.55)}
+.mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
+.mv-hint{position:absolute;right:14px;bottom:16px;margin:0;font-size:11.5px;color:#8fa8cf;z-index:2}
+
+.section-head{display:flex;align-items:center;gap:10px;margin:36px 0 14px;font-size:19px;font-weight:700;color:#dce9ff}
+.dot{
+  display:flex;align-items:center;justify-content:center;flex:0 0 26px;
+  width:26px;height:26px;font-size:13px;font-weight:600;color:#06132c;
+  background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-radius:50%;
+  box-shadow:0 0 16px rgba(90,155,255,.5);
+}
+.body-text{margin:0;font-size:15px;line-height:1.95;color:#c6d6f2}
+.tip{
+  display:flex;gap:10px;margin:16px 0 0;padding:14px 18px;font-size:14px;color:#b8cdf0;
+  background:rgba(120,170,255,.08);border:1px solid rgba(120,170,255,.18);border-radius:12px;
+}
+.tip p{margin:0;line-height:1.85}
+.tip strong{color:#9ad0ff}
+.shots{margin-top:18px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.shots img{
+  width:100%;display:block;cursor:zoom-in;border:1px solid rgba(140,180,255,.22);
+  border-radius:12px;box-shadow:0 10px 28px rgba(0,8,30,.5);
+}
+.sec-emoji{display:flex;align-items:center;gap:8px;margin:46px 0 18px;font-size:18px;font-weight:700;color:#dce9ff}
+.log-item{margin-bottom:16px;padding:22px 24px;background:rgba(16,34,74,.55);border:1px solid rgba(125,170,255,.16);border-radius:16px}
+.log-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.log-title{font-size:15px;font-weight:600;color:#e2ecff}
+.tag{
+  padding:3px 10px;font-size:12px;color:#a9c9ff;
+  background:rgba(110,168,255,.16);border:1px solid rgba(120,170,255,.2);border-radius:999px;
+}
+
+.footer{
+  margin-top:56px;padding:26px 0 40px;text-align:center;font-size:12.5px;
+  letter-spacing:.06em;color:#7f96bd;border-top:1px solid rgba(140,180,255,.15);
+}
+#zoom{
+  display:none;position:fixed;inset:0;z-index:99;align-items:center;justify-content:center;
+  background:rgba(4,10,24,.94);padding:4vh 4vw;cursor:zoom-out;
+}
+#zoom.open{display:flex}
+#zoom img{max-width:100%;max-height:92vh;border-radius:8px}
+
+@media (max-width:640px){
+  .home{padding-top:48px}
+  .home-title{font-size:21px}
+  .note{margin-top:30px}
+  .note-star{font-size:24px}
+  .note-paper{padding:16px 16px 14px;transform:rotate(-1deg)}
+  .cards{grid-template-columns:1fr;gap:18px;margin-top:30px}
+  .card{padding:14px 14px 22px}
+  .card-cover{height:180px}
+  .work{padding-top:26px}
+  .work-title{font-size:24px}
+  .panel{padding:24px 18px 30px;border-radius:20px}
+  .section-head{font-size:17px}
+  .body-text{font-size:14.5px}
+  .planet{width:78px;height:78px;opacity:.4}
+  .planet::after{left:-22px;top:24px;width:122px;height:34px}
+  .moon{width:54px;height:54px;top:5vh;right:8vw}
+  .update-card{padding:18px 20px 16px}
+  .update-dots{display:none}
+  .mv-host{height:320px}
+  .mv-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="sky">
+  <div id="stars"></div>
+  <div class="moon"></div>
+  <div class="planet"></div>
+</div>
+
+<div id="app"></div>
+<div id="zoom"><img alt=""></div>
+
+<script>
+/* ================= 1. 个人信息 ================= */
+const SITE = {
+  name: "孟可欣",
+  studentId: "25108012010",
+  className: "25级数字媒体技术1班",
+  email: "mengmo07@163.com",
+  footer: "© 2025 孟可欣 · 25级数字媒体技术1班"
+};
+
+/* ================= 2. 作业内容 ================= */
+const WORKS = [
+  {
+    id: "computer-set",
+    icon: "🖱️",
+    title: "电脑三件套",
+    model: "assets/model/computer-set.glb",
+    desc: "鼠标分缝 · 键盘挖键 · 显示屏",
+    overview: "电脑三件套按鼠标、键盘、显示屏的顺序完成。鼠标用长方体加切角起形，靠晶格和涡轮平滑做出握感，再处理左右键分缝；键盘按参考图分区，用分段和半透明材质临摹键位，逐层挖空后填满键帽；显示屏为了控制进度做得比较快，用简化的长方体拼出结构，最后贴一块平面并拉高反射做出屏幕。",
+    steps: [
+      {
+        title: "鼠标：上传参考图",
+        text: "先找一张鼠标的正视图和侧视图作为参考，重点看长宽比例、背部最高点的位置，以及左右键缝隙的走向。把参考图放进视口对齐之后再动手，比凭感觉做要准得多。",
+        tip: "参考图可以设为视口背景（Alt+B），按 F3 / F4 随时切换线框，方便对形。",
+        images: []
+      },
+      {
+        title: "长方体加切角修改器",
+        text: "鼠标的形体从一个长方体开始。先按参考图的比例调好长、宽、高，再添加「切角（Chamfer）修改器」，把四条垂直边和一个顶面切出圆角，得到一个圆润的楔形，这就是握感的基础。",
+        tip: "切角分段先给 2~3 段就够，段数太多后面调形会很卡；不够再往上加。",
+        images: []
+      },
+      {
+        title: "晶格与涡轮平滑",
+        text: "接着加「晶格（Lattice）修改器」检查整体布线是否均匀，再叠加「涡轮平滑（TurboSmooth）」把表面变圆润。这一步主要看哪里网格挤在一起——线太密的位置，后面很容易鼓包或者破面。",
+        tip: "涡轮平滑迭代次数先别超过 2，确认大形没问题再往上加，否则改起来非常卡。",
+        images: []
+      },
+      {
+        title: "分出左右键区域",
+        text: "进入多边形层级，选择鼠标前部对应的边，先「切角」把这些边分开，形成左右键的分缝；再选中按键区域的面，沿局部法线向里「挤出」一点，做出按键的高度差；最后对新边缘再切一次角，让缝隙有细微的倒角过渡，不至于生硬。",
+        tip: "挤出的方向一定选「局部法线」，用「组」方向会把缝隙拉歪。",
+        images: []
+      },
+      {
+        title: "修掉破面：翻转法线、移动面、塌陷",
+        text: "分缝做完后，缝隙附近出现了几块发黑、朝里的面（第二张截图记录的就是这个状态）。处理办法是：先选中问题面「翻转」法线，再把挤出的面往回移动一点，让它和相邻面对齐；最后用「塌陷」把多余的细分点收掉，面就基本恢复正常了。",
+        tip: "判断黑面原因：把视口的「背面消隐」关掉，如果黑面消失，就是法线反了；如果还在黑，是两块面重合。",
+        images: []
+      },
+      {
+        title: "添加滚轮与材质",
+        text: "滚轮用一个圆柱体压扁后放进分缝中间，位置略低于按键表面；然后统一给材质：外壳用浅灰色塑料，滚轮用深色橡胶，整体带一点粗糙度。左右键缝隙那里到现在还是有一点点不平整，后面再继续调。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "键盘：上传参考图与分区",
+        text: "把键盘正视图放进视口当底图，先按整体轮廓划出四个区块：主键区、功能键区、编辑键区、小键盘区。分区块的好处是每一块单独建模、单独核对比例，拼起来不会一处歪、全局歪。",
+        tip: "底图透明度调到 50% 左右，既看得清结构，又不会盖住自己画的线。",
+        images: []
+      },
+      {
+        title: "分段与半透明材质",
+        text: "用长方体做键盘底座，长度和高度方向都给分段（例如长度 12 段、高度 3 段），这些分段线就是后面抠键位的参考。再给底座一个半透明材质，就能透过它对着底图逐个临摹键的位置。",
+        tip: "分段数按键位数量来定，宁可多一两段也别少。",
+        images: []
+      },
+      {
+        title: "做出分层",
+        text: "把底座沿高度方向分成几层：最上面是键位面，中间是机身，最下面是底板。分层之后，键帽的凹陷、边框的厚度都在各自那一层处理，互不干扰。",
+        tip: "分层用「挤出」或复制面再往下压，比重新画一个省事。",
+        images: []
+      },
+      {
+        title: "挖空键位",
+        text: "按底图上每个键的位置，在键位层划分出对应的面，再用「挤出（负值）」向下挖出凹槽，尺寸比键帽略小一点，键帽放进去才有卡住的感觉。",
+        tip: "挖之前先复制一层备份，挖坏了还能退回来。",
+        images: []
+      },
+      {
+        title: "填满键帽并调整布线",
+        text: "先做一个标准大小的键帽，再按底图用复制或阵列逐个摆放；回车、Shift、空格这类长键单独拉长。全部摆完后再检查布线，把键帽周围多余的线和交叉点清掉，让每个键的边框都保持干净。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "赋予贴图，键盘完成",
+        text: "给键帽和机身分别上材质：键帽用略带磨砂的白色塑料，机身用浅灰；再把键盘字符的贴图对齐到每个键帽上。到这里键盘就完成了。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "显示屏：快速起形",
+        text: "显示屏没有再一点点抠细节，直接叠长方体：一块薄板做屏幕主体，一块做立柱，一块梯形做底座。比例参照真实显示器，力求把三件套先凑齐，所以这一步做得比前两件快很多。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "简易显示屏的机身",
+        text: "把屏幕正面留出一圈边框，中间的面稍微向内压一点，做出内凹的显示区域；背板加一点点厚度，让它从侧面看不是一张纸。整体结构非常简易，没有做接口、按钮这些细节。",
+        tip: "",
+        images: []
+      },
+      {
+        title: "贴平面做屏幕，电脑三件套完成",
+        text: "最后在屏幕内凹的位置单独贴一个平面当作屏幕，把材质的反射值调高一些，让屏幕看起来像亮面玻璃。到这里鼠标、键盘、显示屏三件都齐了，电脑三件套完成。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: []
+  },
+  {
+    id: "cartoon-house",
+    icon: "🏠",
+    title: "卡通小房子",
+    model: "assets/model/cartoon-house.glb",
+    desc: "可编辑多边形 · 挤出屋顶 · 圆角细节",
+    overview: "先搭建白模确定房子的比例和屋顶坡度，用长方体搭出墙体，屋顶用挤出再用塌陷生成坡面，再补门窗、烟囱等细节，最后用低饱和卡通配色渲染。（图片加载需要时间，请等待）",
+    steps: [
+      { title: "上传原图", text: "", tip: "", images: [] },
+      {
+        title: "墙体与屋顶",
+        text: "墙体用正方体，顶面进行挤出，接着选中相对的两条边进行塌陷做出屋顶效果。",
+        tip: "遵循对称原则，每个 box 的平面位置都是（0，0）。",
+        images: []
+      },
+      { title: "继续屋顶", text: "ctrl+shift 上述的两个面，再用壳修改器做出屋顶效果", tip: "", images: [] },
+      { title: "亿些些步骤", text: "只可意会不可言传，完善了亿些些细节，白模搭建完成。", tip: "", images: [] },
+      { title: "屋顶圆角，丰富细节", text: "加了一些装饰", tip: "", images: [] },
+      { title: "渲染完成", text: "加了路灯，让环境光合理了一点，没有按照参考图上色（感觉有点丑）", tip: "", images: [] }
+    ],
+    logs: []
+  },
+  {
+    id: "sofa",
+    icon: "🛋️",
+    title: "沙发",
+    model: "assets/model/sofa.glb",
+    desc: "镜像建模 · 晶格检查 · NURMS 细分",
+    overview: "沙发先做一半再镜像出整体：用长方体做出坐垫与扶手的大形，轴心对齐中线后镜像并焊接接缝；接着用「晶格」检查布线走向、用「NURMS 细分」观察圆润效果；最后分别完成坐垫的软包体积、靠背的倾斜角度和四条沙发脚。",
+    steps: [
+      {
+        title: "使用镜像",
+        text: "沙发先做一半：用长方体搭出坐垫和扶手的大形，把轴心对齐到中线，再用「镜像」复制出另一半，两半贴合后进入顶点层级焊接接缝。镜像的好处是左右完全对称，不用两边各调一遍。",
+        tip: "镜像前务必把轴心移到中线，否则两半会错开；镜像后如果法线反了，用「重置变换」或翻转法线修一下。",
+        images: []
+      },
+      {
+        title: "使用晶格与 NURMS 切换",
+        text: "大形基本对了之后，加「晶格」修改器检查布线的走向，再打开「NURMS 细分」看圆润之后的体积。晶格看的是网格分布是否均匀，NURMS 看的是细分后有没有塌陷或者鼓包，两者切换着看，问题暴露得最快。",
+        tip: "NURMS 迭代次数先给 1~2，看清形体再往上加，否则调整时会非常卡。",
+        images: []
+      },
+      {
+        title: "沙发坐垫完成",
+        text: "坐垫单独深化：把坐垫对应的面从底座上分离出来，调整顶点做出鼓起的软包体积，边缘压出接缝线槽，再配合细分把边角收圆。坐垫和扶手之间要留一点缝隙，不然后面细分会粘在一起。",
+        tip: "坐垫与扶手之间留 1~2cm 的缝，细分后刚好自然贴合，不会穿模。",
+        images: []
+      },
+      {
+        title: "沙发靠背和沙发脚完成",
+        text: "靠背同样用方块起形，调整倾斜角度后贴合到座面上；沙发脚用圆柱或圆锥做四条，稍微向外张开一点更稳。最后整体检查一遍布线，需要保持硬度的地方补上支撑线，模型完成。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: []
+  }
+];
+
+/* ================= 3. 星空 ================= */
+(function stars(){
+  const box = document.getElementById('stars');
+  for (let i = 0; i < 90; i++){
+    const s = document.createElement('span');
+    const size = (Math.random() * 2 + 1).toFixed(1);
+    s.style.left = (Math.random() * 100).toFixed(2) + '%';
+    s.style.top  = (Math.random() * 100).toFixed(2) + '%';
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.opacity = (0.3 + Math.random() * 0.7).toFixed(2);
+    s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+    box.appendChild(s);
+  }
+})();
+
+/* ================= 4. 工具 ================= */
+const app  = document.getElementById('app');
+const zoom = document.getElementById('zoom');
+
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toArr = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+
+function shots(v){
+  const a = toArr(v);
+  if (!a.length) return '';
+  return `<div class="shots">${a.map(src => `<img src="${esc(src)}" alt="" loading="lazy">`).join('')}</div>`;
+}
+
+function loadImg(src){
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+}
+
+async function autoLoad(){
+  const boxes = document.querySelectorAll('.shots[data-auto]');
+  for (const box of boxes){
+    const base = box.dataset.auto;
+    for (let i = 1; i <= 6; i++){
+      const src = base + (i === 1 ? '.jpg' : '-' + i + '.jpg');
+      const im = await loadImg(src);
+      if (!im) break;
+      box.appendChild(im);
+    }
+  }
+}
+
+/* ================= 5. 首页 ================= */
+function renderHome(){
+  document.title = SITE.name + ' · 三维建模作业';
+
+  const cards = WORKS.map(w => `
+    <a class="card" href="#/${esc(w.id)}">
+      <div class="card-cover">
+        <div class="card-3d" data-src="${esc(w.model || '')}"></div>
+        <div class="card-emoji">${esc(w.icon)}</div>
+      </div>
+      <h2 class="card-title">${esc(w.title)}</h2>
+      <div class="card-line"></div>
+      <p class="card-desc">${esc(w.desc)}</p>
+    </a>`).join('');
+
+  app.innerHTML = `
+    <div class="home">
+      <header>
+        <h1 class="home-title">✦ ${esc(SITE.name)}的个人网站 ✦</h1>
+        <p class="home-meta">姓名：${esc(SITE.name)} · 学号：${esc(SITE.studentId)} · ${esc(SITE.className)}</p>
+        <p class="notice-line"><span class="pulse"></span>若无内容，请刷新等待</p>
+      </header>
+
+      <aside class="note">
+        <div class="note-star">✦</div>
+        <div class="note-thread"></div>
+        <div class="note-paper">
+          <h2>📌 模型说明</h2>
+          <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
+          <p>点击「线框」可切换查看网格结构：此时模型表面会变成半透明，结构线叠加在上层。仍能看到淡淡的实体轮廓，是为了方便分辨模型的朝向和体积，属于正常显示，再点一次即可恢复实体。</p>
+          <p>模型加载需要一点时间，若页面暂时空白，请稍候或刷新页面。</p>
+          <p>页面文字经 AI 辅助润色，但建模思路与操作步骤本人已掌握；页面中的「小提示」为 AI 自行添加，与本人无关（个别提示甚至与操作步骤无关），请以实际制作记录为准。</p>
+        </div>
+      </aside>
+
+      <div class="cards">
+        ${cards}
+
+        <div class="update-card">
+          <div class="update-row">
+            <span class="update-icon">🛰️</span>
+            <div class="update-text">
+              <h2>持续更新中</h2>
+              <p>新的作业会陆续上传到这里</p>
+            </div>
+            <span class="update-dots"><i></i><i></i><i></i></span>
+          </div>
+          <div class="update-bar"><span></span></div>
+        </div>
+      </div>
+
+      <section class="msg-box">
+        <h2>💬 留言与改善建议</h2>
+        <p class="msg-tip">欢迎留下改进建议，我会据此继续修改。</p>
+        <a class="mail-btn" href="mailto:${esc(SITE.email)}?subject=${encodeURIComponent('三维建模作业建议')}">✉️ 直接发邮件给我</a>
+      </section>
+
+      <footer class="footer">${esc(SITE.footer)}</footer>
+    </div>`;
+
+  if (window.initCards) window.initCards();
+  else window.__cardsPending = true;
+}
+
+/* ================= 6. 详情页 ================= */
+function renderWork(w){
+  document.title = w.title + '建模记录 · ' + SITE.name;
+
+  const steps = (w.steps || []).map((s, i) => `
+    <h2 class="section-head"><span class="dot">${i + 1}</span>${esc(s.title)}</h2>
+    ${s.text ? `<p class="body-text">${esc(s.text)}</p>` : ''}
+    ${s.tip ? `<div class="tip"><span>💡</span><p><strong>小提示：</strong>${esc(s.tip)}</p></div>` : ''}
+    ${shots(s.images)}
+    <div class="shots" data-auto="assets/img/${esc(w.id)}/${i + 1}"></div>`).join('');
+
+  const logs = (w.logs || []).map((l, i) => `
+    <div class="log-item">
+      <div class="log-head">
+        <span class="log-title">${esc(l.title)}</span>
+        ${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ''}
+      </div>
+      ${l.text ? `<p class="body-text">${esc(l.text)}</p>` : ''}
+      ${shots(l.images)}
+      <div class="shots" data-auto="assets/img/${esc(w.id)}/log${i + 1}"></div>
+    </div>`).join('');
+
+  app.innerHTML = `
+    <div class="work">
+      <a class="back" href="#/">← 返回首页</a>
+
+      <header class="work-head">
+        <h1 class="work-title">${esc(w.icon)} ${esc(w.title)}建模记录</h1>
+        <p class="work-sub">${esc(SITE.name)} · ${esc(SITE.studentId)} · 三维建模作业</p>
+      </header>
+
+      <article class="panel">
+        <div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>
+
+        ${w.model ? `
+        <div class="viewer">
+          <div class="mv-host" id="mv"></div>
+          <div class="mv-bar">
+            <button data-mv="rotate">暂停旋转</button>
+            <button data-mv="wire">线框</button>
+            <button data-mv="reset">复位</button>
+          </div>
+          <p class="mv-hint">拖动旋转 · 滚轮缩放</p>
+        </div>` : ''}
+
+        ${steps}
+        ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
+      </article>
+
+      <footer class="footer">${esc(SITE.footer)}</footer>
+    </div>`;
+
+  if (w.model){
+    if (window.loadViewer) window.loadViewer(w.model);
+    else window.__modelUrl = w.model;
+  }
+
+  autoLoad();
+}
+
+/* ================= 7. 路由 ================= */
+function render(){
+  const id = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+  const w = WORKS.find(x => x.id === id);
+  w ? renderWork(w) : renderHome();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', render);
+
+/* ================= 8. 交互 ================= */
+document.addEventListener('click', e => {
+  const img = e.target.closest('.shots img');
+  if (img){
+    zoom.firstElementChild.src = img.src;
+    zoom.classList.add('open');
+    return;
+  }
+  if (e.target.closest('#zoom')){
+    zoom.classList.remove('open');
+    return;
+  }
+
+  const b = e.target.closest('[data-mv]');
+  if (!b) return;
+
+  if (b.dataset.mv === 'rotate'){
+    const on = window.mvRotate ? window.mvRotate() : false;
+    b.textContent = on ? '暂停旋转' : '开始旋转';
+  }
+
+  if (b.dataset.mv === 'wire'){
+    const on = window.mvWire ? window.mvWire() : false;
+    b.classList.toggle('on', !!on);
+  }
+
+  if (b.dataset.mv === 'reset'){
+    if (window.mvReset) window.mvReset();
+  }
+});
+
+render();
+</script>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -5,6 +713,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const loader = new GLTFLoader();
 
+/* =========================================================
+   一、详情页的大查看器
+   ========================================================= */
 let renderer = null, scene = null, camera = null, controls = null;
 let model = null, host = null, raf = 0;
 
@@ -45,7 +756,7 @@ function frameModel(){
   controls.update();
 }
 
-/* ===== 线框：两层叠加 ===== */
+/* 线框：淡色全边 + 亮色结构边 */
 function buildEdges(root){
   edgeLines = [];
   meshMats  = [];
@@ -53,16 +764,14 @@ function buildEdges(root){
   const meshes = [];
   root.traverse(o => { if (o.isMesh && o.geometry) meshes.push(o); });
 
-  // 细密的全部边，颜色淡
   const matSoft = new THREE.LineBasicMaterial({
     color: 0x8fc0ff, transparent: true, opacity: 0.22, depthWrite: false
   });
-  // 结构边，亮
   const matHard = new THREE.LineBasicMaterial({
     color: 0xd6ecff, transparent: true, opacity: 0.9, depthWrite: false
   });
 
-  let budget = 460000;   // 线条总量上限，防止卡死
+  let budget = 460000;
 
   meshes.forEach(mesh => {
     (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => {
@@ -75,7 +784,6 @@ function buildEdges(root){
 
     const tris = triCount(mesh.geometry);
 
-    /* ① 全部三角边（淡）—— 面数太大的模型跳过，太密反而看不清 */
     if (tris <= 90000 && budget > 0){
       const wf = new THREE.WireframeGeometry(mesh.geometry);
       const cnt = wf.attributes.position ? wf.attributes.position.count / 2 : 0;
@@ -91,7 +799,6 @@ function buildEdges(root){
       }
     }
 
-    /* ② 结构边（亮）—— 固定 12°，不会因为模型密而丢边 */
     const eg = new THREE.EdgesGeometry(mesh.geometry, 12);
     const cnt2 = eg.attributes.position ? eg.attributes.position.count / 2 : 0;
     if (cnt2 && cnt2 <= budget){
@@ -204,7 +911,9 @@ window.mvReset = () => {
   frameModel();
 };
 
-/* ===== 首页卡片的小模型 ===== */
+/* =========================================================
+   二、首页卡片上的小模型
+   ========================================================= */
 const cardViews = [];
 let cardsLoop = false;
 
@@ -293,6 +1002,11 @@ window.addEventListener('resize', () => {
   });
 });
 
+/* =========================================================
+   三、首次加载兜底
+   ========================================================= */
 if (window.__modelUrl) init(window.__modelUrl);
 initCards();
 </script>
+</body>
+</html>
