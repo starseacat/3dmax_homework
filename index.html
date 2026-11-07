@@ -133,7 +133,7 @@ a{color:inherit;text-decoration:none}
 /* ============ 卡片 ============ */
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;max-width:640px;margin:44px auto 0}
 .card{
-  display:block;padding:16px 16px 24px;
+  display:block;padding:16px 16px 20px;cursor:pointer;
   background:linear-gradient(180deg, rgba(30,58,116,.78), rgba(14,30,66,.85));
   border:1px solid rgba(125,170,255,.20);
   border-radius:22px;
@@ -158,7 +158,6 @@ a{color:inherit;text-decoration:none}
 }
 .card-cover.ready .card-emoji{opacity:0}
 
-/* 卡片底部提示：长句，居中两行，带渐变底 */
 .card-cover.ready::after{
   content:"点击进入详情页，配图和模型加载需要时间，请耐心等待";
   position:absolute;left:0;right:0;bottom:0;
@@ -172,6 +171,18 @@ a{color:inherit;text-decoration:none}
 .card-title{margin:16px 0 0;font-size:21px;font-weight:600;color:#eaf2ff;letter-spacing:.02em}
 .card-line{height:1px;background:rgba(140,180,255,.20);margin:16px 0 12px}
 .card-desc{margin:0;font-size:12.5px;line-height:1.9;color:#9db4dd;letter-spacing:.02em}
+
+/* 卡片上的视频按钮 */
+.card-videos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.v-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:999px;
+  font-size:11.5px;letter-spacing:.03em;color:#bcd8ff;
+  background:rgba(90,145,255,.14);
+  border:1px solid rgba(120,170,255,.28);
+  transition:background .2s,color .2s,border-color .2s;
+}
+.v-chip:hover{background:rgba(110,170,255,.32);color:#ffffff;border-color:rgba(150,200,255,.55)}
 
 /* ============ 持续更新 ============ */
 .update-card{
@@ -232,6 +243,7 @@ a{color:inherit;text-decoration:none}
 }
 .overview strong{color:#a9cbff}
 
+/* 3D 预览 */
 .viewer{
   position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
   border:1px solid rgba(125,170,255,.18);
@@ -248,6 +260,25 @@ a{color:inherit;text-decoration:none}
 .mv-bar button:hover{background:rgba(60,110,200,.55)}
 .mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
 .mv-hint{position:absolute;right:14px;bottom:16px;margin:0;font-size:11.5px;color:#8fa8cf;z-index:2}
+
+/* 视频 */
+.video-block{margin:0 0 32px}
+.video-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.v-tab{
+  padding:6px 14px;font-size:12.5px;color:#bcd8ff;cursor:pointer;
+  background:rgba(90,145,255,.12);
+  border:1px solid rgba(120,170,255,.25);
+  border-radius:999px;transition:.2s;
+}
+.v-tab:hover{background:rgba(110,170,255,.26)}
+.v-tab.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
+.video-frame{
+  position:relative;padding-top:56.25%;
+  border-radius:14px;overflow:hidden;
+  border:1px solid rgba(125,170,255,.2);
+  background:#05101f;
+}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
 .section-head{display:flex;align-items:center;gap:10px;margin:36px 0 14px;font-size:19px;font-weight:700;color:#dce9ff}
 .dot{
@@ -295,7 +326,7 @@ a{color:inherit;text-decoration:none}
   .note-star{font-size:24px}
   .note-paper{padding:16px 16px 14px;transform:rotate(-1deg)}
   .cards{grid-template-columns:1fr;gap:18px;margin-top:30px}
-  .card{padding:14px 14px 22px}
+  .card{padding:14px 14px 18px}
   .card-cover{height:184px}
   .work{padding-top:26px}
   .work-title{font-size:24px}
@@ -333,7 +364,9 @@ const SITE = {
   footer: "© 2025 孟可欣 · 25级数字媒体技术1班"
 };
 
-/* ================= 2. 作业内容 ================= */
+/* ================= 2. 作业内容 =================
+   videos: label 显示名，bvid 用于内嵌播放
+================================================ */
 const WORKS = [
   {
     id: "computer-set",
@@ -341,6 +374,11 @@ const WORKS = [
     title: "电脑三件套",
     model: "assets/model/computer-set.glb",
     desc: "鼠标分缝 · 键盘挖键 · 显示屏",
+    videos: [
+      { label: "鼠标",   bvid: "BV1aa411a78v" },
+      { label: "键盘",   bvid: "BV1VY4y1k7Qf" },
+      { label: "显示器", bvid: "BV1H84y1W7yN" }
+    ],
     overview: "电脑三件套按鼠标、键盘、显示屏的顺序完成。鼠标用长方体加切角起形，靠晶格和涡轮平滑做出握感，再处理左右键分缝；键盘按参考图分区，用分段和半透明材质临摹键位，逐层挖空后填满键帽；显示屏为了控制进度做得比较快，用简化的长方体拼出结构，最后贴一块平面并拉高反射做出屏幕。",
     steps: [
       {
@@ -442,6 +480,9 @@ const WORKS = [
     title: "卡通小房子",
     model: "assets/model/cartoon-house.glb",
     desc: "可编辑多边形 · 挤出屋顶 · 圆角细节",
+    videos: [
+      { label: "小房子", bvid: "BV1jK2dYgE8H" }
+    ],
     overview: "先搭建白模确定房子的比例和屋顶坡度，用长方体搭出墙体，屋顶用挤出再用塌陷生成坡面，再补门窗、烟囱等细节，最后用低饱和卡通配色渲染。（图片加载需要时间，请等待）",
     steps: [
       { title: "上传原图", text: "", tip: "", images: [] },
@@ -464,6 +505,9 @@ const WORKS = [
     title: "沙发",
     model: "assets/model/sofa.glb",
     desc: "镜像建模 · 晶格检查 · NURMS 细分",
+    videos: [
+      { label: "沙发", bvid: "BV13BZbYXEnB" }
+    ],
     overview: "沙发先做一半再镜像出整体：用长方体做出坐垫与扶手的大形，轴心对齐中线后镜像并焊接接缝；接着用「晶格」检查布线走向、用「NURMS 细分」观察圆润效果；最后分别完成坐垫的软包体积、靠背的倾斜角度和四条沙发脚。",
     steps: [
       {
@@ -499,6 +543,9 @@ const WORKS = [
     title: "柜子",
     model: "assets/model/cabinet.glb",
     desc: "插入挤出 · 切角成格 · 侧面圆角",
+    videos: [
+      { label: "衣柜", bvid: "BV1cP411v7r7" }
+    ],
     overview: "柜子用一个长方体起形：正面先「插入」再向内「挤出」做出柜体深度，然后用连接线分格、切角、面挤出，一格一格把储物格掏出来；正面做完之后，侧面同样挤出并切角做出圆角，最后整体统一材质。",
     steps: [
       {
@@ -559,6 +606,9 @@ const zoom = document.getElementById('zoom');
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const toArr = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
 
+const playerSrc = bvid => 'https://player.bilibili.com/player.html?bvid=' + bvid + '&page=1&high_quality=1&danmaku=0&autoplay=0';
+const videoHref = bvid => 'https://www.bilibili.com/video/' + bvid;
+
 function shots(v){
   const a = toArr(v);
   if (!a.length) return '';
@@ -591,8 +641,13 @@ async function autoLoad(){
 function renderHome(){
   document.title = SITE.name + ' · 三维建模作业';
 
-  const cards = WORKS.map(w => `
-    <a class="card" href="#/${esc(w.id)}">
+  const cards = WORKS.map(w => {
+    const chips = (w.videos || []).map(v =>
+      `<a class="v-chip" href="${videoHref(v.bvid)}" target="_blank" rel="noopener">▶ ${esc(v.label)}</a>`
+    ).join('');
+
+    return `
+    <div class="card" data-href="#/${esc(w.id)}">
       <div class="card-cover">
         <div class="card-3d" data-src="${esc(w.model || '')}"></div>
         <div class="card-emoji">${esc(w.icon)}</div>
@@ -600,7 +655,9 @@ function renderHome(){
       <h2 class="card-title">${esc(w.title)}</h2>
       <div class="card-line"></div>
       <p class="card-desc">${esc(w.desc)}</p>
-    </a>`).join('');
+      ${chips ? `<div class="card-videos">${chips}</div>` : ''}
+    </div>`;
+  }).join('');
 
   app.innerHTML = `
     <div class="home">
@@ -617,6 +674,7 @@ function renderHome(){
           <h2>📌 模型说明</h2>
           <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
           <p>点击「线框」可切换查看网格结构：此时模型表面会变成半透明，结构线叠加在上层。仍能看到淡淡的实体轮廓，是为了方便分辨模型的朝向和体积，属于正常显示，再点一次即可恢复实体。</p>
+          <p>若点击「线框」后线条没有立即出现，再点一次即可切换过来，这是模型首次加载时的正常现象。</p>
           <p>模型和图片加载需要时间，若页面暂时空白，请稍候或刷新页面。</p>
           <p>页面文字经 AI 辅助润色，但建模思路与操作步骤本人已掌握；页面中的「小提示」为 AI 自行添加，与本人无关（个别提示甚至与操作步骤无关），请以实际制作记录为准。</p>
         </div>
@@ -673,6 +731,19 @@ function renderWork(w){
       <div class="shots" data-auto="assets/img/${esc(w.id)}/log${i + 1}"></div>
     </div>`).join('');
 
+  const vids = w.videos || [];
+  const videoBlock = vids.length ? `
+    <div class="video-block">
+      ${vids.length > 1 ? `<div class="video-tabs">${vids.map((v, i) =>
+        `<button class="v-tab${i === 0 ? ' on' : ''}" data-src="${playerSrc(v.bvid)}">${esc(v.label)}</button>`
+      ).join('')}</div>` : ''}
+      <div class="video-frame">
+        <iframe src="${playerSrc(vids[0].bvid)}"
+                scrolling="no" frameborder="0" allowfullscreen
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>` : '';
+
   app.innerHTML = `
     <div class="work">
       <a class="back" href="#/">← 返回首页</a>
@@ -695,6 +766,8 @@ function renderWork(w){
           </div>
           <p class="mv-hint">拖动旋转 · 滚轮缩放</p>
         </div>` : ''}
+
+        ${videoBlock}
 
         ${steps}
         ${logs ? `<h2 class="sec-emoji">🔧 学习过程与问题记录</h2>${logs}` : ''}
@@ -722,6 +795,15 @@ window.addEventListener('hashchange', render);
 
 /* ================= 8. 交互 ================= */
 document.addEventListener('click', e => {
+
+  /* 卡片点击进入详情（视频按钮除外） */
+  const card = e.target.closest('.card[data-href]');
+  if (card && !e.target.closest('.v-chip')){
+    location.hash = card.dataset.href;
+    return;
+  }
+
+  /* 图片放大 */
   const img = e.target.closest('.shots img');
   if (img){
     zoom.firstElementChild.src = img.src;
@@ -733,6 +815,17 @@ document.addEventListener('click', e => {
     return;
   }
 
+  /* 视频切换 */
+  const tab = e.target.closest('.v-tab');
+  if (tab){
+    const block = tab.closest('.video-block');
+    block.querySelectorAll('.v-tab').forEach(t => t.classList.toggle('on', t === tab));
+    const iframe = block.querySelector('iframe');
+    if (iframe) iframe.src = tab.dataset.src;
+    return;
+  }
+
+  /* 3D 工具栏 */
   const b = e.target.closest('[data-mv]');
   if (!b) return;
 
