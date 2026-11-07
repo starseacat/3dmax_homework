@@ -144,7 +144,7 @@ a{color:inherit;text-decoration:none}
 .card:hover{transform:translateY(-6px);border-color:rgba(140,190,255,.55);box-shadow:0 24px 60px rgba(40,110,255,.32)}
 
 .card-cover{
-  position:relative;height:156px;border-radius:16px;overflow:hidden;
+  position:relative;height:160px;border-radius:16px;overflow:hidden;
   background:radial-gradient(circle at 50% 58%, rgba(70,125,215,.38), rgba(10,22,50,.25));
   border:1px solid rgba(125,170,255,.14);
 }
@@ -157,9 +157,16 @@ a{color:inherit;text-decoration:none}
   transition:opacity .35s ease;
 }
 .card-cover.ready .card-emoji{opacity:0}
+
+/* 卡片底部提示：长句，居中两行，带渐变底 */
 .card-cover.ready::after{
-  content:"拖动查看";position:absolute;left:10px;bottom:8px;
-  font-size:10.5px;color:rgba(180,210,255,.55);letter-spacing:.08em;
+  content:"点击进入详情页，配图和模型加载需要时间，请耐心等待";
+  position:absolute;left:0;right:0;bottom:0;
+  padding:16px 12px 7px;
+  font-size:10px;line-height:1.5;text-align:center;
+  color:rgba(200,222,255,.85);letter-spacing:.03em;
+  background:linear-gradient(180deg,rgba(8,18,40,0),rgba(8,18,40,.8));
+  pointer-events:none;
 }
 
 .card-title{margin:16px 0 0;font-size:21px;font-weight:600;color:#eaf2ff;letter-spacing:.02em}
@@ -289,7 +296,7 @@ a{color:inherit;text-decoration:none}
   .note-paper{padding:16px 16px 14px;transform:rotate(-1deg)}
   .cards{grid-template-columns:1fr;gap:18px;margin-top:30px}
   .card{padding:14px 14px 22px}
-  .card-cover{height:180px}
+  .card-cover{height:184px}
   .work{padding-top:26px}
   .work-title{font-size:24px}
   .panel{padding:24px 18px 30px;border-radius:20px}
@@ -485,6 +492,47 @@ const WORKS = [
       }
     ],
     logs: []
+  },
+  {
+    id: "cabinet",
+    icon: "🗄️",
+    title: "柜子",
+    model: "assets/model/cabinet.glb",
+    desc: "插入挤出 · 切角成格 · 侧面圆角",
+    overview: "柜子用一个长方体起形：正面先「插入」再向内「挤出」做出柜体深度，然后用连接线分格、切角、面挤出，一格一格把储物格掏出来；正面做完之后，侧面同样挤出并切角做出圆角，最后整体统一材质。",
+    steps: [
+      {
+        title: "长方体做出柜体与第一个格子",
+        text: "柜子从长方体开始。选中正面的面，先「插入（Inset）」缩小一圈，再向内「挤出」，做出柜体内部的深度；接着在正面上用「连接」加线，把面分割成格子大小，对分割出来的面先「切角」、再「挤出」，第一个储物格的凹槽就出现了。",
+        tip: "插入和挤出的数值要统一，所有格子最后才会一样深。",
+        images: []
+      },
+      {
+        title: "连接线、切角、面挤出，重复铺满",
+        text: "其余格子按同样的顺序处理：连接线分格 → 切角 → 面挤出。每做完一格就重复到下一格，注意每格的宽高保持一致，格与格之间的隔板厚度也要相同，整体看上去才规整。",
+        tip: "挤出方向一定选「局部法线」，用「组」方向格子会歪。",
+        images: []
+      },
+      {
+        title: "方形部分完成",
+        text: "正面所有方形格子做完后，检查一遍深度和隔板厚度是否统一；有不平的面用移动顶点或「对齐」修一下，正面部分就完成了。",
+        tip: "检查时可以按 F4 打开边面显示，隔板厚度用肉眼比对最直接。",
+        images: []
+      },
+      {
+        title: "侧面挤出面，做出圆角",
+        text: "侧面同样用「挤出」做出侧板的厚度，再对侧面的边做「切角」，分段给到两三段，让柜子的外轮廓变成圆角，不会显得太生硬。",
+        tip: "切角分段越多越圆润，但也更容易出细面，做完记得检查一遍。",
+        images: []
+      },
+      {
+        title: "完成",
+        text: "最后整体检查一遍布线，需要保持硬度的地方补上支撑线，再给柜体一个木色材质。柜子完成。",
+        tip: "",
+        images: []
+      }
+    ],
+    logs: []
   }
 ];
 
@@ -569,7 +617,7 @@ function renderHome(){
           <h2>📌 模型说明</h2>
           <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
           <p>点击「线框」可切换查看网格结构：此时模型表面会变成半透明，结构线叠加在上层。仍能看到淡淡的实体轮廓，是为了方便分辨模型的朝向和体积，属于正常显示，再点一次即可恢复实体。</p>
-          <p>模型加载需要一点时间，若页面暂时空白，请稍候或刷新页面。</p>
+          <p>模型和图片加载需要时间，若页面暂时空白，请稍候或刷新页面。</p>
           <p>页面文字经 AI 辅助润色，但建模思路与操作步骤本人已掌握；页面中的「小提示」为 AI 自行添加，与本人无关（个别提示甚至与操作步骤无关），请以实际制作记录为准。</p>
         </div>
       </aside>
@@ -713,9 +761,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const loader = new GLTFLoader();
 
-/* =========================================================
-   一、详情页的大查看器
-   ========================================================= */
 let renderer = null, scene = null, camera = null, controls = null;
 let model = null, host = null, raf = 0;
 
@@ -756,7 +801,6 @@ function frameModel(){
   controls.update();
 }
 
-/* 线框：淡色全边 + 亮色结构边 */
 function buildEdges(root){
   edgeLines = [];
   meshMats  = [];
@@ -911,9 +955,7 @@ window.mvReset = () => {
   frameModel();
 };
 
-/* =========================================================
-   二、首页卡片上的小模型
-   ========================================================= */
+/* ===== 首页卡片小模型 ===== */
 const cardViews = [];
 let cardsLoop = false;
 
@@ -1002,9 +1044,6 @@ window.addEventListener('resize', () => {
   });
 });
 
-/* =========================================================
-   三、首次加载兜底
-   ========================================================= */
 if (window.__modelUrl) init(window.__modelUrl);
 initCards();
 </script>
