@@ -79,14 +79,21 @@ a{color:inherit;text-decoration:none}
   100%{box-shadow:0 0 0 0 rgba(127,182,255,0)}
 }
 
-/* ============ 星星挂纸条 · 模型说明 ============ */
+/* ============ 说明纸条（左右两块） ============ */
+.notes{
+  display:grid;gap:22px;
+  max-width:680px;margin:36px auto 0;
+}
+@media (min-width:1000px){
+  .notes{grid-template-columns:1fr 1fr;max-width:720px}
+}
+
 .note{
-  width:100%;max-width:620px;margin:40px auto 0;
   display:flex;flex-direction:column;align-items:center;text-align:center;
 }
 .note-star{
-  font-size:30px;line-height:1;color:#e4f0ff;
-  text-shadow:0 0 16px rgba(160,205,255,.95), 0 0 44px rgba(90,150,255,.6);
+  font-size:22px;line-height:1;color:#e4f0ff;
+  text-shadow:0 0 14px rgba(160,205,255,.95), 0 0 38px rgba(90,150,255,.6);
   animation:starPulse 3.6s ease-in-out infinite;
 }
 @keyframes starPulse{
@@ -94,40 +101,44 @@ a{color:inherit;text-decoration:none}
   50%{transform:scale(1.14) rotate(8deg);opacity:1}
 }
 .note-thread{
-  width:2px;height:28px;
+  width:2px;height:20px;
   background:linear-gradient(180deg,rgba(205,228,255,.9),rgba(205,228,255,.12));
 }
 .note-paper{
   position:relative;width:100%;
-  padding:20px 22px 18px;text-align:left;color:#1b2c4a;
+  padding:15px 16px 13px;text-align:left;color:#1b2c4a;
   background:linear-gradient(180deg,#fcfdff,#e9f1ff);
   border:1px solid rgba(160,195,240,.85);
   border-radius:10px;
-  box-shadow:0 20px 44px rgba(0,10,35,.45), inset 0 0 0 1px rgba(255,255,255,.7);
-  transform:rotate(-1.4deg);
+  box-shadow:0 16px 36px rgba(0,10,35,.42), inset 0 0 0 1px rgba(255,255,255,.7);
+  transform:rotate(-1.2deg);
 }
 .note-paper::before{
-  content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);
-  width:12px;height:12px;border-radius:50%;
+  content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:10px;height:10px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#ffffff,#a3c5ef 60%,#6d95c8);
   box-shadow:0 2px 6px rgba(0,10,35,.45);
 }
 .note-paper::after{
   content:"";position:absolute;right:0;bottom:0;
-  border-width:0 0 16px 16px;border-style:solid;
+  border-width:0 0 14px 14px;border-style:solid;
   border-color:transparent transparent #d3e3fa transparent;
 }
-.note-paper h2{margin:0 0 10px;font-size:14.5px;font-weight:700;color:#12365e;letter-spacing:.05em}
-.note-paper p{margin:0 0 8px;font-size:12.5px;line-height:2;color:#3a5070}
+.note-paper h2{margin:0 0 8px;font-size:13px;font-weight:700;color:#12365e;letter-spacing:.05em}
+.note-paper p{margin:0 0 7px;font-size:11.5px;line-height:1.95;color:#3a5070}
 .note-paper p:last-child{margin-bottom:0}
 .note-paper b{color:#12365e}
 
+/* 宽屏时左右各挂一张，不占正文 */
 @media (min-width:1420px){
+  .notes{display:block;margin:0;max-width:none}
   .note{
-    position:fixed;top:120px;right:28px;
-    width:252px;max-width:none;margin:0;z-index:5;
+    position:fixed;top:110px;width:248px;z-index:5;
   }
-  .note-paper{transform:rotate(-2.4deg)}
+  .note-left{left:26px}
+  .note-right{right:26px}
+  .note-left .note-paper{transform:rotate(-2deg)}
+  .note-right .note-paper{transform:rotate(2deg)}
 }
 
 /* ============ 卡片 ============ */
@@ -172,8 +183,13 @@ a{color:inherit;text-decoration:none}
 .card-line{height:1px;background:rgba(140,180,255,.20);margin:16px 0 12px}
 .card-desc{margin:0;font-size:12.5px;line-height:1.9;color:#9db4dd;letter-spacing:.02em}
 
-/* 卡片上的视频按钮 */
-.card-videos{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+/* 卡片上的视频按钮（带说明） */
+.card-videos{margin-top:14px}
+.v-label{
+  display:block;margin-bottom:8px;
+  font-size:10.5px;letter-spacing:.08em;color:#8fa8cf;
+}
+.v-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .v-chip{
   display:inline-flex;align-items:center;gap:5px;
   padding:5px 12px;border-radius:999px;
@@ -243,7 +259,6 @@ a{color:inherit;text-decoration:none}
 }
 .overview strong{color:#a9cbff}
 
-/* 3D 预览 */
 .viewer{
   position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
   border:1px solid rgba(125,170,255,.18);
@@ -322,9 +337,7 @@ a{color:inherit;text-decoration:none}
 @media (max-width:640px){
   .home{padding-top:48px}
   .home-title{font-size:21px}
-  .note{margin-top:30px}
-  .note-star{font-size:24px}
-  .note-paper{padding:16px 16px 14px;transform:rotate(-1deg)}
+  .notes{margin-top:26px;gap:20px}
   .cards{grid-template-columns:1fr;gap:18px;margin-top:30px}
   .card{padding:14px 14px 18px}
   .card-cover{height:184px}
@@ -364,9 +377,7 @@ const SITE = {
   footer: "© 2025 孟可欣 · 25级数字媒体技术1班"
 };
 
-/* ================= 2. 作业内容 =================
-   videos: label 显示名，bvid 用于内嵌播放
-================================================ */
+/* ================= 2. 作业内容 ================= */
 const WORKS = [
   {
     id: "computer-set",
@@ -643,7 +654,8 @@ function renderHome(){
 
   const cards = WORKS.map(w => {
     const chips = (w.videos || []).map(v =>
-      `<a class="v-chip" href="${videoHref(v.bvid)}" target="_blank" rel="noopener">▶ ${esc(v.label)}</a>`
+      `<a class="v-chip" href="${videoHref(v.bvid)}" target="_blank" rel="noopener"
+          title="点击跳转到 B 站观看">▶ ${esc(v.label)}</a>`
     ).join('');
 
     return `
@@ -655,7 +667,11 @@ function renderHome(){
       <h2 class="card-title">${esc(w.title)}</h2>
       <div class="card-line"></div>
       <p class="card-desc">${esc(w.desc)}</p>
-      ${chips ? `<div class="card-videos">${chips}</div>` : ''}
+      ${chips ? `
+      <div class="card-videos">
+        <span class="v-label">参考学习视频 · 点击跳转 B 站</span>
+        <div class="v-row">${chips}</div>
+      </div>` : ''}
     </div>`;
   }).join('');
 
@@ -667,18 +683,28 @@ function renderHome(){
         <p class="notice-line"><span class="pulse"></span>若无内容，请刷新等待</p>
       </header>
 
-      <aside class="note">
-        <div class="note-star">✦</div>
-        <div class="note-thread"></div>
-        <div class="note-paper">
-          <h2>📌 模型说明</h2>
-          <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
-          <p>点击「线框」可切换查看网格结构：此时模型表面会变成半透明，结构线叠加在上层。仍能看到淡淡的实体轮廓，是为了方便分辨模型的朝向和体积，属于正常显示，再点一次即可恢复实体。</p>
-          <p>若点击「线框」后线条没有立即出现，再点一次即可切换过来，这是模型首次加载时的正常现象。</p>
-          <p>模型和图片加载需要时间，若页面暂时空白，请稍候或刷新页面。</p>
-          <p>页面文字经 AI 辅助润色，但建模思路与操作步骤本人已掌握；页面中的「小提示」为 AI 自行添加，与本人无关（个别提示甚至与操作步骤无关），请以实际制作记录为准。</p>
-        </div>
-      </aside>
+      <div class="notes">
+        <aside class="note note-left">
+          <div class="note-star">✦</div>
+          <div class="note-thread"></div>
+          <div class="note-paper">
+            <h2>📌 模型怎么看</h2>
+            <p>3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片可拖动旋转；详情页可拖动旋转、滚轮缩放，360° 查看。</p>
+            <p>点「线框」切换网格显示：表面会变半透明、结构线叠在上层，仍能看到淡淡实体轮廓属正常；若第一次没反应，再点一次即可。</p>
+            <p>模型和图片加载需要时间，空白时请稍候或刷新。</p>
+          </div>
+        </aside>
+
+        <aside class="note note-right">
+          <div class="note-star">✦</div>
+          <div class="note-thread"></div>
+          <div class="note-paper">
+            <h2>🎬 视频与文字</h2>
+            <p>卡片下方的「▶ 鼠标 / 键盘」等按钮是<b>参考学习视频</b>，点击跳转 B 站；详情页内嵌播放器，可切换查看。</p>
+            <p>页面文字经 AI 辅助润色，建模思路与操作步骤本人已掌握；「小提示」为 AI 自行添加，与本人无关，请以实际制作记录为准。</p>
+          </div>
+        </aside>
+      </div>
 
       <div class="cards">
         ${cards}
@@ -796,14 +822,12 @@ window.addEventListener('hashchange', render);
 /* ================= 8. 交互 ================= */
 document.addEventListener('click', e => {
 
-  /* 卡片点击进入详情（视频按钮除外） */
   const card = e.target.closest('.card[data-href]');
   if (card && !e.target.closest('.v-chip')){
     location.hash = card.dataset.href;
     return;
   }
 
-  /* 图片放大 */
   const img = e.target.closest('.shots img');
   if (img){
     zoom.firstElementChild.src = img.src;
@@ -815,7 +839,6 @@ document.addEventListener('click', e => {
     return;
   }
 
-  /* 视频切换 */
   const tab = e.target.closest('.v-tab');
   if (tab){
     const block = tab.closest('.video-block');
@@ -825,7 +848,6 @@ document.addEventListener('click', e => {
     return;
   }
 
-  /* 3D 工具栏 */
   const b = e.target.closest('[data-mv]');
   if (!b) return;
 
@@ -1142,3 +1164,4 @@ initCards();
 </script>
 </body>
 </html>
+
