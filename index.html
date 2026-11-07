@@ -130,7 +130,7 @@ a{color:inherit;text-decoration:none}
   .note-paper{transform:rotate(-2.4deg)}
 }
 
-/* ============ 卡片（带 3D 预览） ============ */
+/* ============ 卡片 ============ */
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;max-width:640px;margin:44px auto 0}
 .card{
   display:block;padding:16px 16px 24px;
@@ -455,49 +455,36 @@ const WORKS = [
     id: "sofa",
     icon: "🛋️",
     title: "沙发",
-    model: " ",
-    desc: "切角底座 · 多边形编辑 · 镜像复制",
-    overview: "用正方体做底座，切角让棱角变圆润，进入多边形编辑调整顶点与线，做出座面、扶手和靠背的体积，最后用细分配合布料材质表现软包。",
+    model: "assets/model/sofa.glb",
+    desc: "镜像建模 · 晶格检查 · NURMS 细分",
+    overview: "沙发先做一半再镜像出整体：用长方体做出坐垫与扶手的大形，轴心对齐中线后镜像并焊接接缝；接着用「晶格」检查布线走向、用「NURMS 细分」观察圆润效果；最后分别完成坐垫的软包体积、靠背的倾斜角度和四条沙发脚。",
     steps: [
       {
-        title: "沙发底座：切角让棱角变圆润",
-        text: "对正方体的四条垂直边和上边做切角。幅度过大底座会显得松软，过小又不够圆润，试几次才找到合适的数值。",
-        tip: "切角后配合平滑组，表面过渡更自然。",
+        title: "使用镜像",
+        text: "沙发先做一半：用长方体搭出坐垫和扶手的大形，把轴心对齐到中线，再用「镜像」复制出另一半，两半贴合后进入顶点层级焊接接缝。镜像的好处是左右完全对称，不用两边各调一遍。",
+        tip: "镜像前务必把轴心移到中线，否则两半会错开；镜像后如果法线反了，用「重置变换」或翻转法线修一下。",
         images: []
       },
       {
-        title: "沙发形状：调整顶点与线",
-        text: "进入多边形编辑，选中需要外扩或内收的顶点调整位置，再配合边线的缩放和移动，让座面、扶手和靠背过渡更自然。",
-        tip: "多用正视图和侧视图对照，做一半再镜像复制。",
+        title: "使用晶格与 NURMS 切换",
+        text: "大形基本对了之后，加「晶格」修改器检查布线的走向，再打开「NURMS 细分」看圆润之后的体积。晶格看的是网格分布是否均匀，NURMS 看的是细分后有没有塌陷或者鼓包，两者切换着看，问题暴露得最快。",
+        tip: "NURMS 迭代次数先给 1~2，看清形体再往上加，否则调整时会非常卡。",
         images: []
       },
       {
-        title: "坐垫与靠背：软包体积",
-        text: "坐垫用细分做出鼓起的体积，接缝处压出线槽，靠背复制后旋转贴合到扶手上方。",
-        tip: "细分级别先低后高，否则改起来非常卡。",
+        title: "沙发坐垫完成",
+        text: "坐垫单独深化：把坐垫对应的面从底座上分离出来，调整顶点做出鼓起的软包体积，边缘压出接缝线槽，再配合细分把边角收圆。坐垫和扶手之间要留一点缝隙，不然后面细分会粘在一起。",
+        tip: "坐垫与扶手之间留 1~2cm 的缝，细分后刚好自然贴合，不会穿模。",
         images: []
       },
       {
-        title: "材质、灯光与渲染",
-        text: "布料材质加细微凹凸和高光衰减，用柔光箱布光，靠明暗过渡表现软包体积。",
+        title: "沙发靠背和沙发脚完成",
+        text: "靠背同样用方块起形，调整倾斜角度后贴合到座面上；沙发脚用圆柱或圆锥做四条，稍微向外张开一点更稳。最后整体检查一遍布线，需要保持硬度的地方补上支撑线，模型完成。",
         tip: "",
         images: []
       }
     ],
-    logs: [
-      {
-        title: "1. 镜像复制后接缝处错位",
-        tag: "轴心点不在中线",
-        text: "镜像以轴心为基准，轴心不在中线导致错位。把轴心对齐中线后重新镜像，接缝完全贴合。",
-        images: []
-      },
-      {
-        title: "2. 细分之后模型过于圆滑",
-        tag: "没有卡线",
-        text: "在需要保持硬度的边旁边加支撑线，细分后边缘既有圆角又保留轮廓。",
-        images: []
-      }
-    ]
+    logs: []
   }
 ];
 
@@ -580,7 +567,8 @@ function renderHome(){
         <div class="note-thread"></div>
         <div class="note-paper">
           <h2>📌 模型说明</h2>
-          <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度；点击「线框」可切换查看网格结构。</p>
+          <p>本站的 3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片上的模型会自动旋转，进入作品详情页后，可用鼠标拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
+          <p>点击「线框」可切换查看网格结构：此时模型表面会变成半透明，结构线叠加在上层。仍能看到淡淡的实体轮廓，是为了方便分辨模型的朝向和体积，属于正常显示，再点一次即可恢复实体。</p>
           <p>模型加载需要一点时间，若页面暂时空白，请稍候或刷新页面。</p>
           <p>页面文字经 AI 辅助润色，但建模思路与操作步骤本人已掌握；页面中的「小提示」为 AI 自行添加，与本人无关（个别提示甚至与操作步骤无关），请以实际制作记录为准。</p>
         </div>
@@ -611,7 +599,6 @@ function renderHome(){
       <footer class="footer">${esc(SITE.footer)}</footer>
     </div>`;
 
-  /* 首页卡片的 3D 预览 */
   if (window.initCards) window.initCards();
   else window.__cardsPending = true;
 }
@@ -725,22 +712,29 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const loader = new GLTFLoader();
-const EDGE_ANGLE = 10;        // 越小线越全
 
 /* =========================================================
    一、详情页的大查看器
    ========================================================= */
-let renderer = null;
-let scene = null;
-let camera = null;
-let controls = null;
-let model = null;
-let host = null;
-let raf = 0;
+let renderer = null, scene = null, camera = null, controls = null;
+let model = null, host = null, raf = 0;
 
-let edgeLines = [];
-let meshMats  = [];
-let edgeOn    = false;
+let edgeLines = [], meshMats = [], edgeOn = false;
+
+function triCount(geo){
+  if (!geo) return 0;
+  if (geo.index) return geo.index.count / 3;
+  return geo.attributes.position ? geo.attributes.position.count / 3 : 0;
+}
+
+/* 越密的模型阈值越大，线才不会糊成一团 */
+function angleFor(geo){
+  const t = triCount(geo);
+  if (t > 40000) return 34;
+  if (t > 15000) return 26;
+  if (t > 5000)  return 18;
+  return 10;
+}
 
 function disposeAll(){
   if (raf){ cancelAnimationFrame(raf); raf = 0; }
@@ -752,10 +746,8 @@ function disposeAll(){
     renderer = null;
   }
   edgeLines.forEach(l => { if (l.geometry) l.geometry.dispose(); });
-  model = null;
-  controls = null;
-  edgeLines = [];
-  meshMats = [];
+  model = null; controls = null;
+  edgeLines = []; meshMats = [];
 }
 
 function frameModel(){
@@ -781,30 +773,35 @@ function buildEdges(root){
   root.traverse(o => { if (o.isMesh && o.geometry) meshes.push(o); });
 
   const lineMat = new THREE.LineBasicMaterial({
-    color: 0xb9dcff, transparent: true, opacity: 1
+    color: 0xa9d6ff, transparent: true, opacity: 0.8,
+    depthWrite: false
   });
+
+  let totalSeg = 0;
+  const LIMIT = 320000;               // 超过这个量就不再画线，防止卡死
 
   meshes.forEach(mesh => {
     (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => {
       if (!m || !m.userData) return;
       if (!m.userData.__saved){
-        m.userData.__saved = {
-          opacity:    m.opacity,
-          transparent:m.transparent,
-          depthWrite: m.depthWrite
-        };
+        m.userData.__saved = { opacity: m.opacity, transparent: m.transparent, depthWrite: m.depthWrite };
       }
       meshMats.push(m);
     });
 
-    const edges = new THREE.EdgesGeometry(mesh.geometry, EDGE_ANGLE);
-    if (edges.attributes.position && edges.attributes.position.count){
-      const line = new THREE.LineSegments(edges, lineMat);
-      line.visible = false;
-      line.renderOrder = 2;
-      mesh.add(line);
-      edgeLines.push(line);
-    }
+    const edges = new THREE.EdgesGeometry(mesh.geometry, angleFor(mesh.geometry));
+    const pos = edges.attributes.position;
+    if (!pos || !pos.count){ edges.dispose(); return; }
+
+    const seg = pos.count / 2;
+    if (totalSeg + seg > LIMIT){ edges.dispose(); return; }
+    totalSeg += seg;
+
+    const line = new THREE.LineSegments(edges, lineMat);
+    line.visible = false;
+    line.renderOrder = 2;
+    mesh.add(line);
+    edgeLines.push(line);
   });
 }
 
@@ -876,7 +873,6 @@ window.mvRotate = () => {
   return controls.autoRotate;
 };
 
-/* 线框：保留极淡的外壳 + 结构边，模型不会“消失” */
 window.mvWire = () => {
   if (!model) return false;
   edgeOn = !edgeOn;
@@ -888,7 +884,7 @@ window.mvWire = () => {
     if (!s) return;
     if (edgeOn){
       m.transparent = true;
-      m.opacity     = 0.12;
+      m.opacity     = 0.10;
       m.depthWrite  = false;
     } else {
       m.transparent = s.transparent;
@@ -907,7 +903,7 @@ window.mvReset = () => {
 };
 
 /* =========================================================
-   二、首页卡片上的小模型（自动旋转，速度减半）
+   二、首页卡片上的小模型
    ========================================================= */
 const cardViews = [];
 let cardsLoop = false;
@@ -967,7 +963,7 @@ function animateCards(){
   requestAnimationFrame(animateCards);
   for (const v of cardViews){
     if (!document.body.contains(v.host)) continue;
-    v.group.rotation.y += 0.0045;      // 原来 0.009，现在减半
+    v.group.rotation.y += 0.0045;
     v.renderer.render(v.scene, v.camera);
   }
 }
@@ -1003,6 +999,5 @@ window.addEventListener('resize', () => {
 if (window.__modelUrl) init(window.__modelUrl);
 initCards();
 </script>
-
 </body>
 </html>
