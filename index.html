@@ -79,18 +79,12 @@ a{color:inherit;text-decoration:none}
   100%{box-shadow:0 0 0 0 rgba(127,182,255,0)}
 }
 
-/* ============ 说明纸条（左右两块） ============ */
-.notes{
-  display:grid;gap:22px;
-  max-width:680px;margin:36px auto 0;
-}
+/* ============ 说明纸条 ============ */
+.notes{display:grid;gap:22px;max-width:680px;margin:36px auto 0}
 @media (min-width:1000px){
   .notes{grid-template-columns:1fr 1fr;max-width:720px}
 }
-
-.note{
-  display:flex;flex-direction:column;align-items:center;text-align:center;
-}
+.note{display:flex;flex-direction:column;align-items:center;text-align:center}
 .note-star{
   font-size:22px;line-height:1;color:#e4f0ff;
   text-shadow:0 0 14px rgba(160,205,255,.95), 0 0 38px rgba(90,150,255,.6);
@@ -129,12 +123,9 @@ a{color:inherit;text-decoration:none}
 .note-paper p:last-child{margin-bottom:0}
 .note-paper b{color:#12365e}
 
-/* 宽屏时左右各挂一张，不占正文 */
 @media (min-width:1420px){
   .notes{display:block;margin:0;max-width:none}
-  .note{
-    position:fixed;top:110px;width:248px;z-index:5;
-  }
+  .note{position:fixed;top:110px;width:248px;z-index:5}
   .note-left{left:26px}
   .note-right{right:26px}
   .note-left .note-paper{transform:rotate(-2deg)}
@@ -183,12 +174,8 @@ a{color:inherit;text-decoration:none}
 .card-line{height:1px;background:rgba(140,180,255,.20);margin:16px 0 12px}
 .card-desc{margin:0;font-size:12.5px;line-height:1.9;color:#9db4dd;letter-spacing:.02em}
 
-/* 卡片上的视频按钮（带说明） */
 .card-videos{margin-top:14px}
-.v-label{
-  display:block;margin-bottom:8px;
-  font-size:10.5px;letter-spacing:.08em;color:#8fa8cf;
-}
+.v-label{display:block;margin-bottom:8px;font-size:10.5px;letter-spacing:.08em;color:#8fa8cf}
 .v-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .v-chip{
   display:inline-flex;align-items:center;gap:5px;
@@ -254,10 +241,19 @@ a{color:inherit;text-decoration:none}
   box-shadow:0 24px 60px rgba(0,8,30,.45);backdrop-filter:blur(8px);
 }
 .overview{
-  margin:0 0 34px;padding:18px 22px;font-size:15px;line-height:1.95;color:#cfe0ff;
+  margin:0 0 22px;padding:18px 22px;font-size:15px;line-height:1.95;color:#cfe0ff;
   background:rgba(80,140,255,.10);border-left:4px solid #6ea8ff;border-radius:10px;
 }
 .overview strong{color:#a9cbff}
+
+/* 该作品不提供 3D 预览时的提示 */
+.work-hint{
+  margin:0 0 30px;padding:14px 18px;
+  font-size:13px;line-height:1.9;color:#a8c0e4;
+  background:rgba(255,190,110,.08);
+  border:1px dashed rgba(255,196,128,.32);
+  border-radius:12px;
+}
 
 .viewer{
   position:relative;margin:0 0 30px;border-radius:18px;overflow:hidden;
@@ -276,7 +272,6 @@ a{color:inherit;text-decoration:none}
 .mv-bar button.on{color:#04122c;background:linear-gradient(135deg,#5b9bff,#9ad0ff);border-color:transparent}
 .mv-hint{position:absolute;right:14px;bottom:16px;margin:0;font-size:11.5px;color:#8fa8cf;z-index:2}
 
-/* 视频 */
 .video-block{margin:0 0 32px}
 .video-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .v-tab{
@@ -591,6 +586,43 @@ const WORKS = [
       }
     ],
     logs: []
+  },
+  {
+    id: "lighting",
+    icon: "💡",
+    title: "室内灯光",
+    model: "",
+    desc: "空间框架 · 玻璃透光 · 灯光布置",
+    hint: "这件作品的重点是灯光与玻璃折射，这类效果无法随 .glb 一起导出，所以这里只展示过程截图，不做 3D 预览。想感受亮度变化，请看下面第 2 步和第 3 步的对比图。",
+    videos: [],
+    overview: "这节课练的是室内灯光：先用长方体围出一个封闭的房间，其中一面做成玻璃窗；一开始玻璃是不透明材质，光进不来，室内一片死黑，把折射和不透明度调好之后光才透进来；最后在窗外布置主光、室内补辅光，一边渲染小图一边调亮度，直到整张图的明暗过渡舒服。",
+    steps: [
+      {
+        title: "先搭个框架",
+        text: "用长方体围出室内空间：地板、四面墙、天花，其中一面留作窗洞。结构和厚度都做得很简单，重点是把房间的长宽高比例和相机视角先定下来，方便后面布置灯光时对照。",
+        tip: "窗洞那块可以先不封玻璃，等灯光调好再加，避免一开始就被材质挡住视线。",
+        images: []
+      },
+      {
+        title: "玻璃不透光，需要调整",
+        text: "把玻璃装上去之后渲染，室内几乎是全黑的——光一点都没进来。检查材质才发现，玻璃用的是普通不透明材质，颜色调亮只是让它「看着白」，并不等于能让光穿过。这一步卡了比较久，反复渲了几次才意识到问题不在灯，而在玻璃。",
+        tip: "玻璃要透光，靠的是折射和不透明度，而不是把漫反射颜色调白。",
+        images: []
+      },
+      {
+        title: "玻璃开始透光了",
+        text: "把玻璃换成带折射的材质，降低不透明度之后，窗外的光终于能照进来，室内开始出现明显的明暗过渡：靠近窗户的一侧亮，进深处逐渐变暗。到这一步整个画面的层次就出来了。",
+        tip: "玻璃的折射率不要给太夸张，接近 1.5 左右比较接近真实玻璃。",
+        images: []
+      },
+      {
+        title: "完成打光",
+        text: "在窗外放一盏主光模拟太阳，室内再补一到两盏柔和的辅光，把暗部提亮一点但不制造新的硬阴影；然后调整曝光和对比，让亮部不过曝、暗部还能看出细节。反复渲小图对比之后，这张图就算完成了。",
+        tip: "先定主光方向再补光，顺序反了容易越调越乱。",
+        images: []
+      }
+    ],
+    logs: []
   }
 ];
 
@@ -689,7 +721,7 @@ function renderHome(){
           <div class="note-thread"></div>
           <div class="note-paper">
             <h2>📌 模型怎么看</h2>
-            <p>3D 模型均以 <b>.glb</b> 格式上传至仓库。首页卡片可拖动旋转；详情页可拖动旋转、滚轮缩放，360° 查看。</p>
+            <p>3D 模型均以 <b>.glb</b> 格式上传至仓库。进入作品详情页后，可拖动旋转、滚轮缩放，360° 查看模型的各个角度。</p>
             <p>点「线框」切换网格显示：表面会变半透明、结构线叠在上层，仍能看到淡淡实体轮廓属正常；若第一次没反应，再点一次即可。</p>
             <p>模型和图片加载需要时间，空白时请稍候或刷新。</p>
           </div>
@@ -781,6 +813,8 @@ function renderWork(w){
 
       <article class="panel">
         <div class="overview"><strong>总体过程：</strong>${esc(w.overview)}</div>
+
+        ${w.hint ? `<div class="work-hint">${esc(w.hint)}</div>` : ''}
 
         ${w.model ? `
         <div class="viewer">
@@ -1164,4 +1198,3 @@ initCards();
 </script>
 </body>
 </html>
-
